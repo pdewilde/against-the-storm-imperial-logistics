@@ -1,0 +1,10 @@
+{
+  "name": "ImperialLogistics",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/pdewilde/ATS-ImperialLogistics",
+  "description": "Smart supply chains, individual workshop recipe star upgrades & 4th recipes, unlockable camp auto-move, Tier 4 Imperial Highways, and Continue Settlement Grand Orders with difficulty-scaled Citadel rewards.",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100",
+    "ATS_API_Devs-API-3.7.0"
+  ]
+}

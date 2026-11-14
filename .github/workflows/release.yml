@@ -1,0 +1,136 @@
+name: Build & Attest Release
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pr-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+      ATS_API_VERSION: "3.7.0"
+      ATS_REFS_URL: ${{ secrets.ATS_REFS_URL }}
+      ATS_REFS_TOKEN: ${{ secrets.ATS_REFS_TOKEN }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build PR (when CI reference stubs secret is available)
+        run: |
+          if [ -z "$ATS_REFS_URL" ]; then
+            echo "::notice::Skipping full compile on external fork PR because repository secrets (ATS_REFS_URL) are withheld on fork pull requests."
+            exit 0
+          fi
+
+          mkdir -p ci-libs
+          curl -fsSL "https://thunderstore.io/package/download/ATS_API_Devs/API/${ATS_API_VERSION}/" -o api_pkg.zip
+          unzip -j -q api_pkg.zip "API.dll" -d ci-libs/ || unzip -j -q api_pkg.zip "*/API.dll" -d ci-libs/
+          rm -f api_pkg.zip
+
+          if [ -n "$ATS_REFS_TOKEN" ]; then
+            curl -fsSL -H "Authorization: Bearer $ATS_REFS_TOKEN" -H "Accept: application/octet-stream" "$ATS_REFS_URL" -o ci-refs.zip
+          else
+            curl -fsSL "$ATS_REFS_URL" -o ci-refs.zip
+          fi
+          unzip -q ci-refs.zip -d ci-libs/
+          rm -f ci-refs.zip
+
+          dotnet restore ATS_ImperialLogistics.csproj
+          dotnet build ATS_ImperialLogistics.csproj -c Release --no-restore
+
+  build:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    env:
+      CI: true
+      ATS_API_VERSION: "3.7.0"
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Fetch ATS_API from Thunderstore & stripped game reference stubs
+        env:
+          ATS_REFS_URL: ${{ secrets.ATS_REFS_URL }}
+          ATS_REFS_TOKEN: ${{ secrets.ATS_REFS_TOKEN }}
+        run: |
+          mkdir -p ci-libs
+          curl -fsSL "https://thunderstore.io/package/download/ATS_API_Devs/API/${ATS_API_VERSION}/" -o api_pkg.zip
+          unzip -j -q api_pkg.zip "API.dll" -d ci-libs/ || unzip -j -q api_pkg.zip "*/API.dll" -d ci-libs/
+          rm -f api_pkg.zip
+
+          if [ -z "$ATS_REFS_URL" ]; then
+            echo "::error::Secret ATS_REFS_URL is not configured. Run scripts/pack-ci-refs.ps1 locally, upload obj/ci-refs.zip to a private repo release, and set ATS_REFS_URL (+ optional ATS_REFS_TOKEN)."
+            exit 1
+          fi
+
+          if [ -n "$ATS_REFS_TOKEN" ]; then
+            curl -fsSL -H "Authorization: Bearer $ATS_REFS_TOKEN" -H "Accept: application/octet-stream" "$ATS_REFS_URL" -o ci-refs.zip
+          else
+            curl -fsSL "$ATS_REFS_URL" -o ci-refs.zip
+          fi
+          unzip -q ci-refs.zip -d ci-libs/
+          rm -f ci-refs.zip
+
+      - name: Restore & Build (Release)
+        run: |
+          dotnet restore ATS_ImperialLogistics.csproj
+          dotnet build ATS_ImperialLogistics.csproj -c Release --no-restore
+          rm -rf ci-libs
+
+      - name: Stage Release Files & Generate SHA-256 Checksums
+        run: |
+          cp bin/Release/ATS_ImperialLogistics.dll dist/ATS_ImperialLogistics.dll
+          cd dist
+          sha256sum pdewilde-ImperialLogistics-*.zip ATS_ImperialLogistics.dll > SHA256SUMS.txt
+          sha256sum -c SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Attest Build Provenance (SLSA / Sigstore)
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            dist/pdewilde-ImperialLogistics-*.zip
+            dist/ATS_ImperialLogistics.dll
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdewilde-ImperialLogistics-package
+          path: |
+            dist/pdewilde-ImperialLogistics-*.zip
+            dist/ATS_ImperialLogistics.dll
+            dist/SHA256SUMS.txt
+
+      - name: Publish GitHub Release on Tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            dist/pdewilde-ImperialLogistics-*.zip
+            dist/ATS_ImperialLogistics.dll
+            dist/SHA256SUMS.txt

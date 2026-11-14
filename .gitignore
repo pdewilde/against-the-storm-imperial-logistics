@@ -1,0 +1,21 @@
+# Build & package outputs
+bin/
+obj/
+dist/
+ci-libs/
+
+# IDE & user-specific files
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+Directory.Build.props.user
+
+# Never commit compiled or third-party binaries
+*.dll
+*.pdb
+*.exe
+*.zip
+*.bak
+*.save

@@ -1,0 +1,156 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>ATS_ImperialLogistics</AssemblyName>
+    <RootNamespace>ATS_ImperialLogistics</RootNamespace>
+    <Version>1.0.0</Version>
+    <Author>pdewilde</Author>
+    <PackagePrefix>pdewilde-ImperialLogistics</PackagePrefix>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>disable</Nullable>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+
+    <UseCiReferences Condition="'$(CI)' == 'true' or Exists('$(MSBuildProjectDirectory)\ci-libs\Assembly-CSharp.dll')">true</UseCiReferences>
+    <DisableImplicitFrameworkReferences Condition="'$(UseCiReferences)' != 'true'">true</DisableImplicitFrameworkReferences>
+    <NoStdLib Condition="'$(UseCiReferences)' != 'true'">true</NoStdLib>
+
+    <GameDir Condition="'$(GameDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Against the Storm</GameDir>
+    <ManagedDir Condition="'$(ManagedDir)' == ''">$(GameDir)\Against the Storm_Data\Managed</ManagedDir>
+    <ThunderstoreProfile Condition="'$(ThunderstoreProfile)' == ''">$(APPDATA)\Thunderstore Mod Manager\DataFolder\AgainstTheStorm\profiles\Default</ThunderstoreProfile>
+    <BepInExCoreDir Condition="'$(BepInExCoreDir)' == ''">$(ThunderstoreProfile)\BepInEx\core</BepInExCoreDir>
+    <AtsApiDir Condition="'$(AtsApiDir)' == ''">$(ThunderstoreProfile)\BepInEx\plugins\ATS_API_Devs-API</AtsApiDir>
+    <DeployPluginDir Condition="'$(DeployPluginDir)' == ''">$(ThunderstoreProfile)\BepInEx\plugins\$(PackagePrefix)</DeployPluginDir>
+    <CiLibsDir>$(MSBuildProjectDirectory)\ci-libs</CiLibsDir>
+  </PropertyGroup>
+
+  <!-- CI / GitHub Actions Build Mode: Official NuGet packages + Thunderstore API + Stripped Metadata Stubs -->
+  <ItemGroup Condition="'$(UseCiReferences)' == 'true'">
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" PrivateAssets="all" />
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.15" IncludeAssets="compile" PrivateAssets="all" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" PrivateAssets="all" />
+    <Reference Include="API">
+      <HintPath>$(CiLibsDir)\API.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(CiLibsDir)\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(CiLibsDir)\UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(CiLibsDir)\Unity.TextMeshPro.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UniRx">
+      <HintPath>$(CiLibsDir)\UniRx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UniTask">
+      <HintPath>$(CiLibsDir)\UniTask.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Sirenix.Serialization">
+      <HintPath>$(CiLibsDir)\Sirenix.Serialization.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Local Development Mode: Direct zero-restore compile against local Steam & Thunderstore installation -->
+  <ItemGroup Condition="'$(UseCiReferences)' != 'true'">
+    <Reference Include="mscorlib">
+      <HintPath>$(ManagedDir)\mscorlib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>$(ManagedDir)\System.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Core">
+      <HintPath>$(ManagedDir)\System.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="netstandard">
+      <HintPath>$(ManagedDir)\netstandard.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(BepInExCoreDir)\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>$(BepInExCoreDir)\BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="API">
+      <HintPath>$(AtsApiDir)\API.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(ManagedDir)\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(ManagedDir)\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(ManagedDir)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(ManagedDir)\UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(ManagedDir)\UnityEngine.UIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(ManagedDir)\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(ManagedDir)\Unity.TextMeshPro.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UniRx">
+      <HintPath>$(ManagedDir)\UniRx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UniTask">
+      <HintPath>$(ManagedDir)\UniTask.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(ManagedDir)\Newtonsoft.Json.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Sirenix.Serialization">
+      <HintPath>$(ManagedDir)\Sirenix.Serialization.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="BuildThunderstorePackage" AfterTargets="Build">
+    <PropertyGroup>
+      <PackageStageDir>$(MSBuildProjectDirectory)\obj\package</PackageStageDir>
+      <DistDir>$(MSBuildProjectDirectory)\dist</DistDir>
+      <ZipOut>$(DistDir)\$(PackagePrefix)-$(Version).zip</ZipOut>
+    </PropertyGroup>
+    <RemoveDir Directories="$(PackageStageDir)" />
+    <MakeDir Directories="$(PackageStageDir);$(DistDir)" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(PackageStageDir)" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\manifest.json" DestinationFolder="$(PackageStageDir)" Condition="Exists('$(MSBuildProjectDirectory)\manifest.json')" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\README.md" DestinationFolder="$(PackageStageDir)" Condition="Exists('$(MSBuildProjectDirectory)\README.md')" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\CHANGELOG.md" DestinationFolder="$(PackageStageDir)" Condition="Exists('$(MSBuildProjectDirectory)\CHANGELOG.md')" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\icon.png" DestinationFolder="$(PackageStageDir)" Condition="Exists('$(MSBuildProjectDirectory)\icon.png')" />
+    <ZipDirectory SourceDirectory="$(PackageStageDir)" DestinationFile="$(ZipOut)" Overwrite="true" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(DeployPluginDir)" Condition="'$(UseCiReferences)' != 'true' and Exists('$(DeployPluginDir)')" SkipUnchangedFiles="false" Retries="1" RetryDelayMilliseconds="150" ContinueOnError="WarnAndContinue" />
+  </Target>
+
+</Project>

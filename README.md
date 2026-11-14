@@ -1,0 +1,77 @@
+# Imperial Logistics & Overtime
+
+A comprehensive Quality-of-Life and Late-Game progression mod for *Against the Storm* that streamlines settlement logistics, lets you specialize workshops & camps using crafted packs, adds Tier 4 **Imperial Highways**, and turns **Continue Settlement** into a rewarding post-victory endgame.
+
+---
+
+## Features
+
+### 1. Automated Smart Supply Chains
+- **Surplus-First Ingredient Priority (`0–3`):** Passively prioritizes whichever allowed recipe ingredient currently has the largest warehouse stockpile—while strictly respecting any ingredients you manually check or uncheck.
+- **Raw Food & Fuel Safety Floors:** Automatically pauses non-food and non-fuel industrial recipes from draining emergency edible Raw Food (default floor: `25`) or Hearth Fuel (`25`) so villagers never starve or freeze due to crafting, returning unused buffered stock to the Warehouse.
+- **Demand-Scaled Intermediate Caps:** Assigns smart default production limits (`25 + 10 per active consumer`) to intermediate goods (*Planks, Bricks, Fabric, Pipes, Flour, Containers, Pigment, Bars*) while respecting both local and global limits you set manually.
+
+### 2. Workshop Mastery (Per-Building Upgrades)
+Select any finished Workshop to access its **Mastery Dock**:
+- **Individual Recipe Star Upgrades (`+1★` up to `★★★`):** Spend *Packs of Building Materials*, *Packs of Trade Goods*, and *Wildfire Essence* to step individual recipes up in speed (~18% faster per star) and input efficiency (~20% fewer ingredients per star):
+  - `0★ → ★1`: `4` Packs of Building Materials
+  - `★1 → ★2`: `5` Packs of Building Materials + `3` Packs of Trade Goods
+  - `★2 → ★3`: `6` Packs of Trade Goods + `1` Wildfire Essence
+- **Curated 4th Bonus Recipe (`★1`):** Unlock 1 thematic bonus recipe per workshop (`4` Build Packs on starter workshops like *Flour* on Field Kitchen & *Barrels* on Crude Workstation; `6` Build Packs on blueprint workshops).
+
+### 3. Imperial Highways, Smart Camp Auto-Move & Haulers
+- **Imperial Highways (Available Anytime):** Unlocked from Year 1 in the **Roads** build tab (`1 Pack of Building Materials` per tile). Grants **`+45%` Villager Walk Speed** by default (configurable live up to **`+500%`**) and can be dragged directly over Dirt, Paved, or Reinforced Roads to upgrade them in place.
+- **Smart Camp Auto-Move:** Unlockable on **Woodcutters' Camps** (`3` Build Packs) and **Gathering Camps** (`4` Build Packs) with an `Active / Paused` toggle and `Scout & Move Now` button. Relocates idle depleted camps onto path-reachable terrain near valid targets closest to Warehouses while strictly obeying your Woodcutter **Glade Safety Mode** (*Avoid Glades*, *Only Marked*, etc.).
+- **Outpost Carts (Tier 2 Camp Upgrade):** Spend `4` Trade Packs + `1` Wildfire Essence for `+5` camp carry capacity and `+20%` gathering speed.
+- **Warehouse Hauler Automatons:** Deploy an autonomous Hauler Bot plus `+5` carry capacity & `+5` range on any Main/Small Warehouse (`8` Build Packs + `6` Trade Packs + `1` Wildfire Essence).
+
+### 4. Continue Settlement Overhaul (*Imperial Overtime*)
+Clicking **Continue Settlement** after winning (including **Sealed Forest** victories) activates **Imperial Overtime**:
+- **Hearth Storm-Wards:** Light Wildfire Storm-Wards on Hearths (`10` Build Packs + `2` Wildfire Essence) for **`-45` Forest Hostility** per upgraded Hearth to offset endless yearly hostility scaling.
+- **Grand Orders I–III (Difficulty-Scaled Citadel Payouts):** Complete three sequential industrial commissions to bank permanent Smoldering City currencies (**Food Stockpiles**, **Machinery**, **Artifacts** — scaled automatically by your settlement's **Difficulty Multiplier** and Smoldering City `%` bonus) plus **Cycle-long Caravan Boons** (`+2` Bonus Embarkation Points & `+1` Bonus Starting Villager across Charters II & III).
+- **Move-On Summary:** Clicking **Move On** in the pause menu displays a compact summary of all Citadel currencies and Cycle boons banked during Overtime.
+
+---
+
+## Configuration
+
+Every pillar, cost, reserve floor, speed bonus, and reward value can be toggled or tuned in:
+`BepInEx/config/com.pdewilde.ats.imperiallogistics.cfg` (or live in-game via the **Mods** options tab).
+
+---
+
+## Roadmap (Contributions Welcome!)
+
+Pull requests, balance feedback, and issue reports are very welcome! Planned areas for improvement include:
+
+- **Feature & Economy Balance:** Fine-tuning pack/essence upgrade costs, reserve floors, intermediate cap formulas, highway speed bonuses, and Overtime payout curves across all Prestige tiers.
+- **Roguelike Variety in Overtime:** Procedural/randomized late-game Grand Order objectives and reward pools so every Continue Settlement run feels fresh.
+- **Excess Reputation Rewards:** Rewarding surplus Reputation earned past the Victory threshold (from high Resolve, caches, and glade events) with bonus supplies, perks, or Citadel payouts.
+- **Native Building Upgrade UI Integration:** Migrating custom docked upgrade rows into *Against the Storm*'s native building upgrade menu/tab instead of drawing external boxes alongside building panels.
+- **Distinct Imperial Highway Visuals:** Custom terrain texture/tint so Tier 4 Imperial Highways are visually distinct on the map from Tier 3 Reinforced Roads.
+- **DLC Testing & Integration:** Thorough testing and bonus recipe/upgrade coverage across *Keepers of the Stone* and other DLC content.
+
+---
+
+## Trusted Builds & Verification
+
+Official release archives are built directly from tagged source commits on GitHub-hosted runners via [GitHub Actions](.github/workflows/release.yml) with **SLSA Build Provenance Attestations** (`actions/attest-build-provenance`). You can cryptographically verify any release archive with the GitHub CLI:
+
+```bash
+gh attestation verify pdewilde-ImperialLogistics-1.0.0.zip --owner pdewilde
+```
+
+---
+
+## AI Disclosure
+
+Generative AI tools were used in the process of researching, designing, and writing this mod, alongside in-game playtesting and iterative refinement.
+
+## Acknowledgments & Disclaimer
+
+Built with [BepInEx](https://github.com/BepInEx/BepInEx), [HarmonyX](https://github.com/BepInEx/HarmonyX), and [ATS_API](https://thunderstore.io/c/against-the-storm/p/ATS_API_Devs/API/).
+This is an unofficial fan-made mod for *Against the Storm* and is not affiliated with or endorsed by Eremite Games or Hooded Horse.
+
+## License
+
+Licensed under the [MIT License](LICENSE).
