@@ -40,9 +40,32 @@ Every pillar, cost, reserve floor, speed bonus, and reward value can be toggled 
 
 ---
 
-## Roadmap (Contributions Welcome!)
+## Getting Started (Developing & Modding with LLMs)
 
-Pull requests, balance feedback, and issue reports are very welcome! Planned areas for improvement include:
+Whether you want to tweak this mod, implement one of the ideas below, or use the [GitHub repository](https://github.com/pdewilde/ATS-ImperialLogistics) as a starter template to build your own *Against the Storm* mod with an AI coding assistant, everything is set up to build locally in one command.
+
+### Prerequisites
+1. [.NET SDK](https://dotnet.microsoft.com/download) (6.0 or newer).
+2. *Against the Storm* installed via Steam (if installed outside `C:\Program Files (x86)\Steam\steamapps\common\Against the Storm`, pass `-p:GameDir="D:\Path\To\Against the Storm"`).
+3. [Thunderstore Mod Manager](https://www.overwolf.com/app/Thunderstore-Thunderstore_Mod_Manager) (or **r2modman**) with **`BepInExPack`** and **`ATS_API_Devs-API`** installed in your profile.
+
+### Build & Auto-Deploy
+```powershell
+dotnet build -c Release
+```
+Building in `Release` compiles `ATS_ImperialLogistics.dll`, packages a Thunderstore-ready archive in `dist/`, and automatically copies the `.dll` into your Thunderstore `Default` profile's `BepInEx/plugins/` folder if present.
+
+### Bundled LLM Agent Skill & Modding Docs
+This repository includes a ready-to-use **Agent Skill** and context guide summarizing *Against the Storm*'s service architecture, lifecycle hooks, clean-room metadata inspection commands, and engine pitfalls (such as non-readable GPU sprite crashes, localization scene-reload loops, and sidecar save fingerprinting):
+- **[AGENTS.md](AGENTS.md)** — Automatic repository map and guardrails picked up by coding agents (*Antigravity, Claude Code, Cursor, Codex, GitHub Copilot*, etc.).
+- **[.agents/skills/ats-modding/SKILL.md](.agents/skills/ats-modding/SKILL.md)** — Step-by-step workflow for extending this mod or bootstrapping a brand-new *Against the Storm* mod from scratch.
+- **[ats-architecture-and-pitfalls.md](.agents/skills/ats-modding/references/ats-architecture-and-pitfalls.md)** — Deep-dive reference on `Eremite` services, `ATS_API` gotchas, UI docking, and meta-reward persistence (can also be pasted directly into any chat LLM).
+
+---
+
+## Future Ideas (Contributions Welcome!)
+
+Active development on this mod may be limited going forward, so forks, pull requests, and community spin-offs are very welcome! Here are some open ideas if you'd like to build on it:
 
 - **Feature & Economy Balance:** Fine-tuning pack/essence upgrade costs, reserve floors, intermediate cap formulas, highway speed bonuses, and Overtime payout curves across all Prestige tiers.
 - **Roguelike Variety in Overtime:** Procedural/randomized late-game Grand Order objectives and reward pools so every Continue Settlement run feels fresh.
