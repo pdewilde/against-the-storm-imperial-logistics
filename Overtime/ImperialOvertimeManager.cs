@@ -856,6 +856,12 @@ namespace ATS_ImperialLogistics.Overtime
             }
         }
 
+        private static float GetNextExcessReputationThreshold(int completedMilestones)
+        {
+            float step = Mathf.Max(0f, ModConfig.ExcessReputationStepIncrease.Value);
+            return Mathf.Max(0.25f, 1f + Math.Max(0, completedMilestones) * step);
+        }
+
         public static void RecordExcessReputation(float amount, ReputationChangeSource source, string reason)
         {
             if (amount <= 0f || !IsExcessReputationActive())
@@ -867,9 +873,15 @@ namespace ATS_ImperialLogistics.Overtime
             state.OvertimeExcessReputationProgress += amount;
 
             int granted = 0;
-            while (state.OvertimeExcessReputationProgress >= 1f)
+            while (true)
             {
-                state.OvertimeExcessReputationProgress -= 1f;
+                float threshold = GetNextExcessReputationThreshold(state.OvertimeExcessReputationMilestones);
+                if (state.OvertimeExcessReputationProgress < threshold)
+                {
+                    break;
+                }
+
+                state.OvertimeExcessReputationProgress -= threshold;
                 state.OvertimeExcessReputationMilestones++;
                 GrantExcessReputationMilestone(state.OvertimeExcessReputationMilestones, source);
                 granted++;
@@ -897,12 +909,17 @@ namespace ATS_ImperialLogistics.Overtime
             bool grantEmbarkPoint = isMajor && (embarkCap == 0 || state.OvertimeExcessReputationEmbarkPointsEarned < embarkCap);
             bool grantFallbackRare = isMajor && !grantEmbarkPoint;
 
+            // Alternate between Machinery (odd post-cap major) and Artifact (even post-cap major)
+            int majorIndex = milestone / majorEvery;
+            int postCapMajorIndex = Math.Max(1, majorIndex - embarkCap);
+            bool fallbackIsMachinery = (postCapMajorIndex % 2 == 1);
+
             int amber = Math.Max(0, ModConfig.ExcessReputationAmberReward.Value);
             int wildfire = isMajor ? 1 : 0;
             int embarkPts = grantEmbarkPoint ? 1 : 0;
             int bread = ScaleMetaCurrency(MetaCurrencyTypes.Food_Stockpiles, Math.Max(0, ModConfig.ExcessReputationBreadReward.Value));
-            int machinery = grantFallbackRare ? ScaleMetaCurrency(MetaCurrencyTypes.Machinery, 1) : 0;
-            int artifacts = grantFallbackRare ? ScaleMetaCurrency(MetaCurrencyTypes.Artifacts, 1) : 0;
+            int machinery = (grantFallbackRare && fallbackIsMachinery) ? ScaleMetaCurrency(MetaCurrencyTypes.Machinery, 1) : 0;
+            int artifacts = (grantFallbackRare && !fallbackIsMachinery) ? ScaleMetaCurrency(MetaCurrencyTypes.Artifacts, 1) : 0;
 
             try
             {
@@ -995,7 +1012,8 @@ namespace ATS_ImperialLogistics.Overtime
 
             var state = SettlementModState.Current;
             int earned = state.OvertimeExcessReputationMilestones;
-            int pct = Mathf.Clamp(Mathf.FloorToInt(state.OvertimeExcessReputationProgress * 100f), 0, 99);
+            float threshold = GetNextExcessReputationThreshold(earned);
+            int pct = Mathf.Clamp(Mathf.FloorToInt((state.OvertimeExcessReputationProgress / threshold) * 100f), 0, 99);
             float perMin = _lastResolveExcessRepPerSec * 60f;
 
             int amber = Math.Max(0, ModConfig.ExcessReputationAmberReward.Value);
@@ -1008,17 +1026,23 @@ namespace ATS_ImperialLogistics.Overtime
             int toMajor = majorEvery - (earned % majorEvery);
             bool nextIsMajor = (nextMilestone % majorEvery == 0);
 
+            int upcomingMajorIndex = ((earned / majorEvery) + 1);
+            int postCapIndex = Math.Max(1, upcomingMajorIndex - embarkCap);
+            string nextRareText = (postCapIndex % 2 == 1)
+                ? $"+{ScaleMetaCurrency(MetaCurrencyTypes.Machinery, 1)} Machinery"
+                : $"+{ScaleMetaCurrency(MetaCurrencyTypes.Artifacts, 1)} Artifact";
+
             string majorRewardText = canEarnEmbark
                 ? $"+1 Wildfire Essence & +1 Cycle Embarkation Point{(embarkCap > 0 ? $" ({state.OvertimeExcessReputationEmbarkPointsEarned}/{embarkCap})" : string.Empty)}"
-                : $"+1 Wildfire Essence, +{ScaleMetaCurrency(MetaCurrencyTypes.Machinery, 1)} Machinery & +{ScaleMetaCurrency(MetaCurrencyTypes.Artifacts, 1)} Artifact";
+                : $"+1 Wildfire Essence & {nextRareText}";
 
             string majorLine = nextIsMajor
                 ? $"<color=#FFD966>Next (#{nextMilestone}) is a Major Acclaim:</color> {majorRewardText}!"
-                : $"Major Acclaim ({majorRewardText}) in {toMajor} pt{(toMajor == 1 ? string.Empty : "s")}.";
+                : $"Major Acclaim ({majorRewardText}) in {toMajor} milestone{(toMajor == 1 ? string.Empty : "s")}.";
 
-            desc = $"<color=#FFD966><b>Imperial Overtime Acclaim:</b></color> {earned} earned ({pct}% to #{nextMilestone})"
+            desc = $"<color=#FFD966><b>Imperial Overtime Acclaim:</b></color> {earned} earned ({state.OvertimeExcessReputationProgress:F2}/{threshold:F1} Rep, {pct}% to #{nextMilestone})"
                 + $"\nResolve Gain: <b>+{perMin:F2} / min</b> (also counts Caches, Events & Orders)"
-                + $"\nPer +1.0 Rep: +{amber} Amber, +{bread} Citadel Food Stockpiles"
+                + $"\nPer Milestone: +{amber} Amber, +{bread} Citadel Food Stockpiles"
                 + $"\n{majorLine}";
             return true;
         }

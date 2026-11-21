@@ -62,6 +62,7 @@ namespace ATS_ImperialLogistics
         public static ConfigEntry<int> ExcessReputationBreadReward;
         public static ConfigEntry<int> ExcessReputationBonusEveryN;
         public static ConfigEntry<int> ExcessReputationEmbarkPointsCap;
+        public static ConfigEntry<float> ExcessReputationStepIncrease;
 
         // Pillar 5: Imperial Highways (Available Anytime)
         public static ConfigEntry<bool> EnableImperialHighways;
@@ -205,17 +206,20 @@ namespace ATS_ImperialLogistics
                 "4. Continue Settlement Overtime", "EnableOvertimeExcessReputation", true,
                 "Reward surplus Reputation earned past Victory (from High Resolve, Caches, Glade Events, Orders, and Perks) during Continue Settlement.");
             ExcessReputationAmberReward = config.Bind(
-                "4. Continue Settlement Overtime", "ExcessReputationAmberReward", 15,
-                new ConfigDescription("Amber delivered to Main Warehouse for every +1.0 Excess Reputation earned in Overtime.", new AcceptableValueRange<int>(0, 200)));
+                "4. Continue Settlement Overtime", "ExcessReputationAmberReward", 5,
+                new ConfigDescription("Amber delivered to Main Warehouse for each Excess Reputation Acclaim milestone in Overtime.", new AcceptableValueRange<int>(0, 200)));
             ExcessReputationBreadReward = config.Bind(
-                "4. Continue Settlement Overtime", "ExcessReputationBreadReward", 3,
-                new ConfigDescription("Base (1.0x Settler) Citadel Food Stockpiles banked permanently for every +1.0 Excess Reputation earned in Overtime.", new AcceptableValueRange<int>(0, 50)));
+                "4. Continue Settlement Overtime", "ExcessReputationBreadReward", 1,
+                new ConfigDescription("Base (1.0x Settler) Citadel Food Stockpiles banked permanently for each Excess Reputation Acclaim milestone in Overtime.", new AcceptableValueRange<int>(0, 50)));
             ExcessReputationBonusEveryN = config.Bind(
-                "4. Continue Settlement Overtime", "ExcessReputationBonusEveryN", 3,
-                new ConfigDescription("Every Nth Excess Reputation milestone triggers a Major Acclaim (+1 Wildfire Essence plus +1 Cycle Embarkation Point up to cap, then Machinery & Artifact).", new AcceptableValueRange<int>(1, 20)));
+                "4. Continue Settlement Overtime", "ExcessReputationBonusEveryN", 5,
+                new ConfigDescription("Every Nth Excess Reputation milestone triggers a Major Acclaim (+1 Wildfire Essence plus +1 Cycle Embarkation Point up to cap, then alternating Machinery or Artifact).", new AcceptableValueRange<int>(1, 20)));
             ExcessReputationEmbarkPointsCap = config.Bind(
-                "4. Continue Settlement Overtime", "ExcessReputationEmbarkPointsCap", 2,
-                new ConfigDescription("Max Cycle Embarkation Points earnable per settlement from Major Excess Reputation milestones (0 = unlimited). Once capped, Major Acclaim falls back to Machinery & Artifact.", new AcceptableValueRange<int>(0, 20)));
+                "4. Continue Settlement Overtime", "ExcessReputationEmbarkPointsCap", 1,
+                new ConfigDescription("Max Cycle Embarkation Points earnable per settlement from Major Excess Reputation milestones (0 = unlimited). Once capped, Major Acclaim alternates between Machinery and Artifact.", new AcceptableValueRange<int>(0, 20)));
+            ExcessReputationStepIncrease = config.Bind(
+                "4. Continue Settlement Overtime", "ExcessReputationStepIncrease", 0.5f,
+                new ConfigDescription("Extra Reputation required per subsequent Excess Reputation milestone (e.g., 0.5 = 1.0, 1.5, 2.0, 2.5...; 0.0 = flat 1.0).", new AcceptableValueRange<float>(0f, 5f)));
 
             EnableImperialHighways = config.Bind(
                 "5. Imperial Highways", "EnableImperialHighways", true,
