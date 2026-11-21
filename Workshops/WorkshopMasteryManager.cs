@@ -21,6 +21,10 @@ namespace ATS_ImperialLogistics.Workshops
         private static readonly Dictionary<string, WorkshopRecipeModel> NextGradeLookup =
             new Dictionary<string, WorkshopRecipeModel>(StringComparer.Ordinal);
 
+        // Maps any cloned recipe model name -> its original vanilla WorkshopRecipeModel.Name (for lossless vanilla save reversion)
+        private static readonly Dictionary<string, string> CloneToVanillaRecipeName =
+            new Dictionary<string, string>(StringComparer.Ordinal);
+
         // Maps produced good name -> best representative 1-star recipe model for curated 4th-recipe unlocks
         private static readonly Dictionary<string, WorkshopRecipeModel> OneStarByGood =
             new Dictionary<string, WorkshopRecipeModel>(StringComparer.Ordinal);
@@ -88,6 +92,7 @@ namespace ATS_ImperialLogistics.Workshops
                     WorkshopRecipeModel nextClone = CreateSteppedGradeClone(prev, nextLevel, gradesByLevel[nextLevel], fullRegisteredName);
                     RecipeManager.AddRecipe(Plugin.PluginGuid, shortKey, nextClone);
                     NextGradeLookup[prev.Name] = nextClone;
+                    CloneToVanillaRecipeName[nextClone.Name] = baseRecipe.Name;
 
                     string goodName = nextClone.GetProducedGood();
                     if (nextLevel == 1 && !string.IsNullOrEmpty(goodName) && !OneStarByGood.ContainsKey(goodName))
@@ -114,22 +119,83 @@ namespace ATS_ImperialLogistics.Workshops
                 var g1Clone = CreateDownscaledOneStarClone(r, grade1, fullName);
                 RecipeManager.AddRecipe(Plugin.PluginGuid, shortKey, g1Clone);
                 OneStarByGood[goodName] = g1Clone;
+                CloneToVanillaRecipeName[g1Clone.Name] = r.Name;
 
                 // Wire its G1 -> G2 -> G3 upgrade path too
                 string g2Key = $"{shortKey}_ImpG2";
                 var g2Clone = CreateSteppedGradeClone(g1Clone, 2, grade2, $"{Plugin.PluginGuid}_{g2Key}");
                 RecipeManager.AddRecipe(Plugin.PluginGuid, g2Key, g2Clone);
                 NextGradeLookup[g1Clone.Name] = g2Clone;
+                CloneToVanillaRecipeName[g2Clone.Name] = r.Name;
 
                 string g3Key = $"{shortKey}_ImpG3";
                 var g3Clone = CreateSteppedGradeClone(g2Clone, 3, grade3, $"{Plugin.PluginGuid}_{g3Key}");
                 RecipeManager.AddRecipe(Plugin.PluginGuid, g3Key, g3Clone);
                 NextGradeLookup[g2Clone.Name] = g3Clone;
+                CloneToVanillaRecipeName[g3Clone.Name] = r.Name;
                 createdCount += 3;
             }
 
             RecipeManager.SyncRecipes();
             Plugin.Log.LogInfo($"WorkshopMasteryManager registered {createdCount} stepped star-upgrade recipes.");
+        }
+
+        public static bool TryGetBaseVanillaRecipeName(string cloneModelName, out string vanillaName)
+        {
+            vanillaName = null;
+            if (string.IsNullOrEmpty(cloneModelName))
+            {
+                return false;
+            }
+            if (CloneToVanillaRecipeName.TryGetValue(cloneModelName, out vanillaName))
+            {
+                return true;
+            }
+            // Fallback for older legacy prefix if ever present in an old save (e.g. different plugin GUID prefix)
+            int idx = cloneModelName.IndexOf("_Imp", StringComparison.Ordinal);
+            if (idx > 0)
+            {
+                foreach (var kv in CloneToVanillaRecipeName)
+                {
+                    if (kv.Key.EndsWith(cloneModelName.Substring(cloneModelName.IndexOf('_') + 1), StringComparison.Ordinal))
+                    {
+                        vanillaName = kv.Value;
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public static void SyncRecipeMapToState()
+        {
+            if (Svc.Buildings?.Workshops == null)
+            {
+                return;
+            }
+
+            var map = SettlementModState.Current.CloneToVanillaRecipeMap;
+            bool changed = false;
+            foreach (var workshop in Svc.Buildings.Workshops.Values)
+            {
+                if (workshop?.state?.recipes == null) continue;
+                foreach (var r in workshop.state.recipes)
+                {
+                    if (r != null && TryGetBaseVanillaRecipeName(r.model, out string vanillaName))
+                    {
+                        if (!map.TryGetValue(r.model, out string existing) || !string.Equals(existing, vanillaName, StringComparison.Ordinal))
+                        {
+                            map[r.model] = vanillaName;
+                            changed = true;
+                        }
+                    }
+                }
+            }
+
+            if (changed)
+            {
+                SettlementModState.Save();
+            }
         }
 
         private static string SanitizeName(string raw)
@@ -559,6 +625,10 @@ namespace ATS_ImperialLogistics.Workshops
 
             recipeState.model = nextModel.Name;
             recipeState.ingredients = newIngredients;
+            if (TryGetBaseVanillaRecipeName(nextModel.Name, out string vanillaBase))
+            {
+                SettlementModState.Current.CloneToVanillaRecipeMap[nextModel.Name] = vanillaBase;
+            }
             SettlementModState.Save();
 
             Svc.PlayClickSuccess();
@@ -575,7 +645,7 @@ namespace ATS_ImperialLogistics.Workshops
         public static void RenderMasteryDock(WorkshopPanel panel, Workshop workshop)
         {
             if (panel == null) return;
-            if (!ModConfig.EnableWorkshopMastery.Value || workshop == null || !workshop.IsFinished() || workshop.state?.recipes == null)
+            if (!ModConfig.EnableWorkshopMastery.Value || VanillaSaveConverter.IsRevertLocked || workshop == null || !workshop.IsFinished() || workshop.state?.recipes == null)
             {
                 ImperialUiHelper.HideDock(panel.transform);
                 return;

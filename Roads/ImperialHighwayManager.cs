@@ -5,6 +5,7 @@ using System.Reflection;
 using ATS_API.Helpers;
 using ATS_API.Localization;
 using ATS_ImperialLogistics.Helpers;
+using ATS_ImperialLogistics.Persistence;
 using Eremite.Buildings;
 using Eremite.Controller.Roads;
 using Eremite.Model;
@@ -80,7 +81,9 @@ namespace ATS_ImperialLogistics.Roads
                 _highwayModel.isActive = true;
                 _highwayModel.isInShop = ModConfig.EnableImperialHighways.Value;
                 _highwayModel.canBePicked = true;
-                _highwayModel.initiallyEssential = true;
+                // Keep initiallyEssential = false so vanilla MetaStateFixer never pollutes MetaSave.save with a mod building ID;
+                // EnsureUnlockedInActiveSettlement() unlocks Imperial Highways per active settlement cleanly instead.
+                _highwayModel.initiallyEssential = false;
                 _highwayModel.dlc = DLCType.None;
                 _highwayModel.requirements = Array.Empty<BaseModelRequirement>();
                 _highwayModel.usabilityTags = Array.Empty<ModelTag>();
@@ -213,6 +216,10 @@ namespace ATS_ImperialLogistics.Roads
 
         private static void EnsureUnlockedInActiveSettlement()
         {
+            if (VanillaSaveConverter.IsRevertLocked)
+            {
+                return;
+            }
             if (_highwayModel != null && Svc.GameContent != null && !Svc.GameContent.IsUnlocked(_highwayModel))
             {
                 Svc.GameContent.Unlock(_highwayModel);

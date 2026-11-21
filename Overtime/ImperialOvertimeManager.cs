@@ -31,9 +31,11 @@ namespace ATS_ImperialLogistics.Overtime
         private static OrderModel _wave1Order;
         private static OrderModel _wave2Order;
         private static OrderModel _wave3Order;
+        private static OrderModel _wave4Order;
         private static EffectModel _wave1RewardEffect;
         private static EffectModel _wave2RewardEffect;
         private static EffectModel _wave3RewardEffect;
+        private static EffectModel _wave4RewardEffect;
         private static EffectModel _stormWardPerkEffect;
         private static IDisposable _orderCompletedSub;
         private static bool _modelsRegistered;
@@ -110,10 +112,22 @@ namespace ATS_ImperialLogistics.Overtime
                 "Grants +3 Parts.",
                 GoodsTypes.Mat_Processed_Parts, 3);
 
+            _wave4RewardEffect = CreateRewardEffect(
+                "ImperialCharter_Reward4",
+                "Ancient Seal Expedition",
+                $"Grants +2 Wildfire Essence, +4 Parts, and banks +{Math.Max(0, ModConfig.Wave4SealFragmentsReward.Value)} Cycle Seal Fragment(s) (scales with Difficulty).",
+                GoodsTypes.Hearth_Parts, 2);
+
+            var wave4PartsEffect = CreateRewardEffect(
+                "ImperialCharter_Reward4_Parts",
+                "Ancient Seal Expedition Parts",
+                "Grants +4 Parts.",
+                GoodsTypes.Mat_Processed_Parts, 4);
+
             // Safe neutral effect for reputationReward slot (since game is already won)
             EffectModel neutralRepReward = wave1PartsEffect;
 
-            // 3. Register Wave I, II, III Grand Orders (tiers empty so they never spawn in standard Year 1-5 draws)
+            // 3. Register Wave I–IV Grand Orders (tiers empty so they never spawn in standard Year 1-5 draws)
             _wave1Order = BuildGrandOrder(
                 "GrandOrder_Wave1",
                 "Imperial Charter I: Industrial Foundation",
@@ -150,7 +164,19 @@ namespace ATS_ImperialLogistics.Overtime
                 _wave3RewardEffect,
                 wave3PartsEffect);
 
-            Plugin.Log.LogInfo("ImperialOvertimeManager registered Grand Orders I–III and Storm-Ward perks.");
+            _wave4Order = BuildGrandOrder(
+                "GrandOrder_Wave4",
+                "Imperial Charter IV: Ancient Seal Expedition",
+                new[]
+                {
+                    MakeGoodObjective(GoodsTypes.Packs_Pack_Of_Luxury_Goods, 120),
+                    MakeGoodObjective(GoodsTypes.Packs_Pack_Of_Trade_Goods, 120),
+                    MakeGoodObjective(GoodsTypes.Tools_Simple_Tools, 60)
+                },
+                _wave4RewardEffect,
+                wave4PartsEffect);
+
+            Plugin.Log.LogInfo("ImperialOvertimeManager registered Grand Orders I–IV and Storm-Ward perks.");
         }
 
         private static EffectModel CreateStormWardEffect()
@@ -273,7 +299,7 @@ namespace ATS_ImperialLogistics.Overtime
 
         public static void Tick()
         {
-            if (!ModConfig.EnableImperialOvertime.Value)
+            if (!ModConfig.EnableImperialOvertime.Value || VanillaSaveConverter.IsRevertLocked)
             {
                 return;
             }
@@ -300,7 +326,7 @@ namespace ATS_ImperialLogistics.Overtime
 
         public static void EnsureOvertimeActive()
         {
-            if (!ModConfig.EnableImperialOvertime.Value || Svc.Orders == null)
+            if (!ModConfig.EnableImperialOvertime.Value || VanillaSaveConverter.IsRevertLocked || Svc.Orders == null)
             {
                 return;
             }
@@ -312,7 +338,7 @@ namespace ATS_ImperialLogistics.Overtime
 
                 Svc.News?.PublishNews(
                     "Imperial Overtime Charter Activated!",
-                    "Check your Orders panel for Grand Orders that bank Citadel Food Stockpiles & Cycle Boons, and Hearths for Storm-Wards.",
+                    "Check your Orders panel for Grand Orders that bank Citadel Stockpiles, Seal Fragments & Cycle Boons, and Hearths for Storm-Wards.",
                     AlertSeverity.Info,
                     GoodsTypes.Packs_Pack_Of_Luxury_Goods.ToGoodModel()?.icon,
                     null);
@@ -326,12 +352,12 @@ namespace ATS_ImperialLogistics.Overtime
         {
             var completed = SettlementModState.Current.CompletedGrandOrderWaves;
             int nextExpectedWave = 1;
-            while (nextExpectedWave <= 3 && completed != null && completed.Contains(nextExpectedWave))
+            while (nextExpectedWave <= 4 && completed != null && completed.Contains(nextExpectedWave))
             {
                 nextExpectedWave++;
             }
 
-            if (nextExpectedWave <= 3)
+            if (nextExpectedWave <= 4)
             {
                 SpawnGrandOrderWave(nextExpectedWave);
             }
@@ -344,6 +370,7 @@ namespace ATS_ImperialLogistics.Overtime
                 1 => _wave1Order,
                 2 => _wave2Order,
                 3 => _wave3Order,
+                4 => _wave4Order,
                 _ => null
             };
 
@@ -439,6 +466,7 @@ namespace ATS_ImperialLogistics.Overtime
                 if (_wave1Order != null && orderState.model == _wave1Order.Name) model = _wave1Order;
                 else if (_wave2Order != null && orderState.model == _wave2Order.Name) model = _wave2Order;
                 else if (_wave3Order != null && orderState.model == _wave3Order.Name) model = _wave3Order;
+                else if (_wave4Order != null && orderState.model == _wave4Order.Name) model = _wave4Order;
 
                 if (model == null || orderState.objectives == null)
                 {
@@ -508,7 +536,32 @@ namespace ATS_ImperialLogistics.Overtime
             else if (_wave3Order != null && completedOrder.model == _wave3Order.Name)
             {
                 GrantGrandOrderMetaRewards(3);
+                SpawnGrandOrderWave(4);
             }
+            else if (_wave4Order != null && completedOrder.model == _wave4Order.Name)
+            {
+                GrantGrandOrderMetaRewards(4);
+            }
+        }
+
+        private static int ScaleSealFragments(int baseAmount)
+        {
+            if (baseAmount <= 0)
+            {
+                return 0;
+            }
+
+            float mult = 1f;
+            if (ModConfig.ScaleOvertimeRewardsWithDifficulty.Value)
+            {
+                var diff = Svc.BiomeSvc?.Difficulty;
+                if (diff != null && diff.rewardsMultiplier > 0f)
+                {
+                    mult = diff.rewardsMultiplier;
+                }
+            }
+
+            return Math.Max(1, Mathf.RoundToInt(baseAmount * mult));
         }
 
         private static int ScaleMetaCurrency(MetaCurrencyTypes currencyType, int baseAmount)
@@ -560,9 +613,10 @@ namespace ATS_ImperialLogistics.Overtime
             bool isWave1 = ReferenceEquals(effect, _wave1RewardEffect);
             bool isWave2 = ReferenceEquals(effect, _wave2RewardEffect);
             bool isWave3 = ReferenceEquals(effect, _wave3RewardEffect);
+            bool isWave4 = ReferenceEquals(effect, _wave4RewardEffect);
             bool isWard = ReferenceEquals(effect, _stormWardPerkEffect);
 
-            if (!isWave1 && !isWave2 && !isWave3 && !isWard)
+            if (!isWave1 && !isWave2 && !isWave3 && !isWave4 && !isWard)
             {
                 return false;
             }
@@ -597,12 +651,19 @@ namespace ATS_ImperialLogistics.Overtime
                 return true;
             }
 
-            int w3Bread = ScaleMetaCurrency(MetaCurrencyTypes.Food_Stockpiles, Math.Max(0, ModConfig.Wave3BreadReward.Value));
-            int w3Mach = ScaleMetaCurrency(MetaCurrencyTypes.Machinery, Math.Max(0, ModConfig.Wave3MachineryReward.Value));
-            int w3Art = ScaleMetaCurrency(MetaCurrencyTypes.Artifacts, Math.Max(0, ModConfig.Wave3ArtifactsReward.Value));
-            int w3Emb = Math.Max(0, ModConfig.Wave3BonusEmbarkPoints.Value);
-            int w3Vil = Math.Max(0, ModConfig.Wave3BonusCycleVillagers.Value);
-            description = $"Grants +2 Wildfire Essence and banks +{w3Bread} Food Stockpiles, +{w3Mach} Machinery, +{w3Art} Artifacts{diffTag}, +{w3Emb} Cycle Embarkation Point, and +{w3Vil} Cycle Starting Villager.";
+            if (isWave3)
+            {
+                int w3Bread = ScaleMetaCurrency(MetaCurrencyTypes.Food_Stockpiles, Math.Max(0, ModConfig.Wave3BreadReward.Value));
+                int w3Mach = ScaleMetaCurrency(MetaCurrencyTypes.Machinery, Math.Max(0, ModConfig.Wave3MachineryReward.Value));
+                int w3Art = ScaleMetaCurrency(MetaCurrencyTypes.Artifacts, Math.Max(0, ModConfig.Wave3ArtifactsReward.Value));
+                int w3Emb = Math.Max(0, ModConfig.Wave3BonusEmbarkPoints.Value);
+                int w3Vil = Math.Max(0, ModConfig.Wave3BonusCycleVillagers.Value);
+                description = $"Grants +2 Wildfire Essence and banks +{w3Bread} Food Stockpiles, +{w3Mach} Machinery, +{w3Art} Artifacts{diffTag}, +{w3Emb} Cycle Embarkation Point, and +{w3Vil} Cycle Starting Villager.";
+                return true;
+            }
+
+            int w4Fragments = ScaleSealFragments(Math.Max(0, ModConfig.Wave4SealFragmentsReward.Value));
+            description = $"Grants +2 Wildfire Essence, +4 Parts, and banks +{w4Fragments} Cycle Seal Fragment{(w4Fragments == 1 ? string.Empty : "s")}{diffTag} toward reforging Ancient Seals.";
             return true;
         }
 
@@ -618,6 +679,7 @@ namespace ATS_ImperialLogistics.Overtime
             int baseArtifacts = 0;
             int embarkPts = 0;
             int cycleVillagers = 0;
+            int baseSealFragments = 0;
 
             switch (wave)
             {
@@ -636,11 +698,15 @@ namespace ATS_ImperialLogistics.Overtime
                     embarkPts = Math.Max(0, ModConfig.Wave3BonusEmbarkPoints.Value);
                     cycleVillagers = Math.Max(0, ModConfig.Wave3BonusCycleVillagers.Value);
                     break;
+                case 4:
+                    baseSealFragments = Math.Max(0, ModConfig.Wave4SealFragmentsReward.Value);
+                    break;
             }
 
             int bread = ScaleMetaCurrency(MetaCurrencyTypes.Food_Stockpiles, baseBread);
             int machinery = ScaleMetaCurrency(MetaCurrencyTypes.Machinery, baseMachinery);
             int artifacts = ScaleMetaCurrency(MetaCurrencyTypes.Artifacts, baseArtifacts);
+            int sealFragments = ScaleSealFragments(baseSealFragments);
 
             try
             {
@@ -660,11 +726,13 @@ namespace ATS_ImperialLogistics.Overtime
                     }
                 }
 
+                bool worldChanged = false;
                 if (Svc.WorldState?.CycleEffects != null)
                 {
                     if (embarkPts > 0)
                     {
                         Svc.WorldState.CycleEffects.bonusPreparationPoints += embarkPts;
+                        worldChanged = true;
                     }
                     if (cycleVillagers > 0)
                     {
@@ -679,7 +747,19 @@ namespace ATS_ImperialLogistics.Overtime
                             Svc.WorldState.CycleEffects.bonusEmbarkVillagers += cycleVillagers;
                             Svc.MetaState?.RebuildEmbarkBonuses();
                         }
+                        worldChanged = true;
                     }
+                }
+
+                if (sealFragments > 0 && Svc.WorldState?.Cycle != null)
+                {
+                    Svc.WorldState.Cycle.sealFragments += sealFragments;
+                    Svc.WorldState.Cycle.totalSealFragments += sealFragments;
+                    worldChanged = true;
+                }
+
+                if (worldChanged)
+                {
                     Svc.WorldState.SaveState();
                 }
 
@@ -697,6 +777,7 @@ namespace ATS_ImperialLogistics.Overtime
             SettlementModState.Current.OvertimeBankedArtifacts += artifacts;
             SettlementModState.Current.OvertimeBankedEmbarkPoints += embarkPts;
             SettlementModState.Current.OvertimeBankedCycleVillagers += cycleVillagers;
+            SettlementModState.Current.OvertimeBankedSealFragments += sealFragments;
             SettlementModState.FlushToDisk(force: true);
 
             var summaryParts = new List<string>();
@@ -705,6 +786,7 @@ namespace ATS_ImperialLogistics.Overtime
             if (artifacts > 0) summaryParts.Add($"+{artifacts} Artifacts");
             if (embarkPts > 0) summaryParts.Add($"+{embarkPts} Cycle Embark Point");
             if (cycleVillagers > 0) summaryParts.Add($"+{cycleVillagers} Cycle Starting Villager");
+            if (sealFragments > 0) summaryParts.Add($"+{sealFragments} Seal Fragment{(sealFragments == 1 ? string.Empty : "s")}");
 
             string diffTag = GetDifficultyLabel();
             string summaryLine = string.Join(", ", summaryParts);
@@ -721,6 +803,7 @@ namespace ATS_ImperialLogistics.Overtime
         public static bool IsExcessReputationActive()
         {
             return Svc.Active
+                && !VanillaSaveConverter.IsRevertLocked
                 && ModConfig.EnableImperialOvertime.Value
                 && ModConfig.EnableOvertimeExcessReputation.Value
                 && IsInOvertime()
@@ -806,14 +889,20 @@ namespace ATS_ImperialLogistics.Overtime
 
         private static void GrantExcessReputationMilestone(int milestone, ReputationChangeSource source)
         {
+            var state = SettlementModState.Current;
             int majorEvery = Math.Max(1, ModConfig.ExcessReputationBonusEveryN.Value);
             bool isMajor = (milestone % majorEvery == 0);
 
+            int embarkCap = Math.Max(0, ModConfig.ExcessReputationEmbarkPointsCap.Value);
+            bool grantEmbarkPoint = isMajor && (embarkCap == 0 || state.OvertimeExcessReputationEmbarkPointsEarned < embarkCap);
+            bool grantFallbackRare = isMajor && !grantEmbarkPoint;
+
             int amber = Math.Max(0, ModConfig.ExcessReputationAmberReward.Value);
             int wildfire = isMajor ? 1 : 0;
+            int embarkPts = grantEmbarkPoint ? 1 : 0;
             int bread = ScaleMetaCurrency(MetaCurrencyTypes.Food_Stockpiles, Math.Max(0, ModConfig.ExcessReputationBreadReward.Value));
-            int machinery = isMajor ? ScaleMetaCurrency(MetaCurrencyTypes.Machinery, 1) : 0;
-            int artifacts = isMajor ? ScaleMetaCurrency(MetaCurrencyTypes.Artifacts, 1) : 0;
+            int machinery = grantFallbackRare ? ScaleMetaCurrency(MetaCurrencyTypes.Machinery, 1) : 0;
+            int artifacts = grantFallbackRare ? ScaleMetaCurrency(MetaCurrencyTypes.Artifacts, 1) : 0;
 
             try
             {
@@ -845,6 +934,12 @@ namespace ATS_ImperialLogistics.Overtime
                     }
                 }
 
+                if (embarkPts > 0 && Svc.WorldState?.CycleEffects != null)
+                {
+                    Svc.WorldState.CycleEffects.bonusPreparationPoints += embarkPts;
+                    Svc.WorldState.SaveState();
+                }
+
                 Svc.MetaState?.SaveState();
                 Svc.MetaState?.SaveGameWonBackup();
             }
@@ -853,14 +948,16 @@ namespace ATS_ImperialLogistics.Overtime
                 Plugin.Log.LogError($"Failed granting Excess Reputation milestone #{milestone}: {ex}");
             }
 
-            var state = SettlementModState.Current;
             state.OvertimeBankedBread += bread;
             state.OvertimeBankedMachinery += machinery;
             state.OvertimeBankedArtifacts += artifacts;
+            state.OvertimeBankedEmbarkPoints += embarkPts;
+            state.OvertimeExcessReputationEmbarkPointsEarned += embarkPts;
 
             var parts = new List<string>();
             if (amber > 0) parts.Add($"+{amber} Amber");
             if (wildfire > 0) parts.Add($"+{wildfire} Wildfire Essence");
+            if (embarkPts > 0) parts.Add($"+{embarkPts} Cycle Embarkation Point");
             if (bread > 0) parts.Add($"+{bread} Citadel Food Stockpiles");
             if (machinery > 0) parts.Add($"+{machinery} Machinery");
             if (artifacts > 0) parts.Add($"+{artifacts} Artifact{(artifacts == 1 ? string.Empty : "s")}");
@@ -904,13 +1001,20 @@ namespace ATS_ImperialLogistics.Overtime
             int amber = Math.Max(0, ModConfig.ExcessReputationAmberReward.Value);
             int bread = ScaleMetaCurrency(MetaCurrencyTypes.Food_Stockpiles, Math.Max(0, ModConfig.ExcessReputationBreadReward.Value));
             int majorEvery = Math.Max(1, ModConfig.ExcessReputationBonusEveryN.Value);
+            int embarkCap = Math.Max(0, ModConfig.ExcessReputationEmbarkPointsCap.Value);
+            bool canEarnEmbark = embarkCap == 0 || state.OvertimeExcessReputationEmbarkPointsEarned < embarkCap;
+
             int nextMilestone = earned + 1;
             int toMajor = majorEvery - (earned % majorEvery);
             bool nextIsMajor = (nextMilestone % majorEvery == 0);
 
+            string majorRewardText = canEarnEmbark
+                ? $"+1 Wildfire Essence & +1 Cycle Embarkation Point{(embarkCap > 0 ? $" ({state.OvertimeExcessReputationEmbarkPointsEarned}/{embarkCap})" : string.Empty)}"
+                : $"+1 Wildfire Essence, +{ScaleMetaCurrency(MetaCurrencyTypes.Machinery, 1)} Machinery & +{ScaleMetaCurrency(MetaCurrencyTypes.Artifacts, 1)} Artifact";
+
             string majorLine = nextIsMajor
-                ? $"<color=#FFD966>Next (#{nextMilestone}) is a Major Acclaim:</color> +1 Wildfire Essence, +{ScaleMetaCurrency(MetaCurrencyTypes.Machinery, 1)} Machinery & +{ScaleMetaCurrency(MetaCurrencyTypes.Artifacts, 1)} Artifact!"
-                : $"Major Acclaim (+1 Wildfire Essence, Machinery & Artifact) in {toMajor} pt{(toMajor == 1 ? string.Empty : "s")}.";
+                ? $"<color=#FFD966>Next (#{nextMilestone}) is a Major Acclaim:</color> {majorRewardText}!"
+                : $"Major Acclaim ({majorRewardText}) in {toMajor} pt{(toMajor == 1 ? string.Empty : "s")}.";
 
             desc = $"<color=#FFD966><b>Imperial Overtime Acclaim:</b></color> {earned} earned ({pct}% to #{nextMilestone})"
                 + $"\nResolve Gain: <b>+{perMin:F2} / min</b> (also counts Caches, Events & Orders)"
@@ -928,7 +1032,7 @@ namespace ATS_ImperialLogistics.Overtime
 
             if (charterCount == 0 && excessMilestones == 0)
             {
-                return $"{vanillaDesc}\n<size=85%><color=#FFD966><b>Imperial Overtime:</b></color> 0/3 Charters completed.</size>";
+                return $"{vanillaDesc}\n<size=85%><color=#FFD966><b>Imperial Overtime:</b></color> 0/4 Charters completed.</size>";
             }
 
             int totalBread = state.OvertimeBankedBread;
@@ -936,9 +1040,10 @@ namespace ATS_ImperialLogistics.Overtime
             int totalArtifacts = state.OvertimeBankedArtifacts;
             int totalEmbarkPts = state.OvertimeBankedEmbarkPoints;
             int totalCycleVillagers = state.OvertimeBankedCycleVillagers;
+            int totalSealFragments = state.OvertimeBankedSealFragments;
 
             // Fallback for older state files created before cumulative banked fields existed
-            if (totalBread == 0 && totalMachinery == 0 && totalArtifacts == 0 && charterCount > 0)
+            if (totalBread == 0 && totalMachinery == 0 && totalArtifacts == 0 && totalSealFragments == 0 && charterCount > 0)
             {
                 if (completed.Contains(1)) totalBread += ScaleMetaCurrency(MetaCurrencyTypes.Food_Stockpiles, Math.Max(0, ModConfig.Wave1BreadReward.Value));
                 if (completed.Contains(2))
@@ -955,6 +1060,10 @@ namespace ATS_ImperialLogistics.Overtime
                     totalEmbarkPts += Math.Max(0, ModConfig.Wave3BonusEmbarkPoints.Value);
                     totalCycleVillagers += Math.Max(0, ModConfig.Wave3BonusCycleVillagers.Value);
                 }
+                if (completed.Contains(4))
+                {
+                    totalSealFragments += ScaleSealFragments(Math.Max(0, ModConfig.Wave4SealFragmentsReward.Value));
+                }
             }
 
             var treasuryLines = new List<string>();
@@ -963,13 +1072,14 @@ namespace ATS_ImperialLogistics.Overtime
             if (totalArtifacts > 0) treasuryLines.Add($"+{totalArtifacts} Artifacts");
 
             var cycleLines = new List<string>();
+            if (totalSealFragments > 0) cycleLines.Add($"+{totalSealFragments} Seal {(totalSealFragments == 1 ? "Fragment" : "Fragments")}");
             if (totalEmbarkPts > 0) cycleLines.Add($"+{totalEmbarkPts} Embarkation {(totalEmbarkPts == 1 ? "Pt" : "Pts")}");
             if (totalCycleVillagers > 0) cycleLines.Add($"+{totalCycleVillagers} Starting {(totalCycleVillagers == 1 ? "Villager" : "Villagers")}");
 
             // Replace vanilla boilerplate with a compact 3-line summary so DecisionPopup's fixed-height centered box never overflows
             string diffTag = GetDifficultyLabel();
             string excessTag = excessMilestones > 0 ? $" • {excessMilestones} Excess Rep" : string.Empty;
-            string text = $"<size=88%><color=#FFD966><b>Imperial Overtime — {charterCount}/3 Charters{excessTag}{diffTag}</b></color>";
+            string text = $"<size=88%><color=#FFD966><b>Imperial Overtime — {charterCount}/4 Charters{excessTag}{diffTag}</b></color>";
             if (treasuryLines.Count > 0)
             {
                 text += $"\n<b>Citadel Banked:</b> {string.Join(", ", treasuryLines)}";
@@ -1009,7 +1119,7 @@ namespace ATS_ImperialLogistics.Overtime
         public static void RenderHearthDock(HearthPanel panel, Hearth hearth)
         {
             if (panel == null) return;
-            if (!ModConfig.EnableImperialOvertime.Value || hearth == null || !hearth.IsFinished() || !IsInOvertime())
+            if (!ModConfig.EnableImperialOvertime.Value || VanillaSaveConverter.IsRevertLocked || hearth == null || !hearth.IsFinished() || !IsInOvertime())
             {
                 ImperialUiHelper.HideDock(panel.transform);
                 return;
@@ -1122,7 +1232,7 @@ namespace ATS_ImperialLogistics.Overtime
         public static void RenderStorageDock(StoragePanel panel, Storage storage)
         {
             if (panel == null) return;
-            if (!ModConfig.EnableWarehouseAutomatons.Value || storage == null || !storage.IsFinished())
+            if (!ModConfig.EnableWarehouseAutomatons.Value || VanillaSaveConverter.IsRevertLocked || storage == null || !storage.IsFinished())
             {
                 ImperialUiHelper.HideDock(panel.transform);
                 return;

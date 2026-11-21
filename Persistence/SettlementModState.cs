@@ -57,8 +57,13 @@ namespace ATS_ImperialLogistics.Persistence
         public int OvertimeBankedArtifacts = 0;
         public int OvertimeBankedEmbarkPoints = 0;
         public int OvertimeBankedCycleVillagers = 0;
+        public int OvertimeBankedSealFragments = 0;
         public float OvertimeExcessReputationProgress = 0f;
         public int OvertimeExcessReputationMilestones = 0;
+        public int OvertimeExcessReputationEmbarkPointsEarned = 0;
+
+        // Exact map of cloned workshop recipe model name -> original vanilla WorkshopRecipeModel.Name for clean vanilla save reversion
+        public Dictionary<string, string> CloneToVanillaRecipeMap = new Dictionary<string, string>(StringComparer.Ordinal);
 
         public void Normalize()
         {
@@ -83,6 +88,9 @@ namespace ATS_ImperialLogistics.Persistence
             StormWardAppliedReductionByHearth ??= new Dictionary<int, int>();
             AutomatonStorages ??= new HashSet<int>();
             CompletedGrandOrderWaves ??= new HashSet<int>();
+            CloneToVanillaRecipeMap = CloneToVanillaRecipeMap != null
+                ? new Dictionary<string, string>(CloneToVanillaRecipeMap, StringComparer.Ordinal)
+                : new Dictionary<string, string>(StringComparer.Ordinal);
 
             int defaultReduction = Math.Abs(ModConfig.HearthStormWardHostilityReduction?.Value ?? 45);
             foreach (int hearthId in StormWardHearths)
@@ -116,7 +124,7 @@ namespace ATS_ImperialLogistics.Persistence
             return $"{cond.seed}:{cond.biomeName ?? string.Empty}:{cond.worldMapField.x},{cond.worldMapField.y}";
         }
 
-        private static string GetStateFilePath()
+        public static string GetActiveProfileFolder()
         {
             try
             {
@@ -125,13 +133,23 @@ namespace ATS_ImperialLogistics.Persistence
                     string profileDir = Svc.Profiles.GetProfileFolderPath();
                     if (!string.IsNullOrEmpty(profileDir) && Directory.Exists(profileDir))
                     {
-                        return Path.Combine(profileDir, "ImperialLogistics_SettlementState.json");
+                        return profileDir;
                     }
                 }
             }
             catch
             {
-                // Fallback to BepInEx config folder
+                // Ignore
+            }
+            return null;
+        }
+
+        public static string GetStateFilePath()
+        {
+            string profileDir = GetActiveProfileFolder();
+            if (!string.IsNullOrEmpty(profileDir))
+            {
+                return Path.Combine(profileDir, "ImperialLogistics_SettlementState.json");
             }
 
             string dir = Path.Combine(Paths.ConfigPath, "ATS_ImperialLogistics_State");

@@ -28,9 +28,17 @@ Select any finished Workshop to access its **Mastery Dock**:
 ### 4. Continue Settlement Overhaul (*Imperial Overtime*)
 Clicking **Continue Settlement** after winning (including **Sealed Forest** victories) activates **Imperial Overtime**:
 - **Hearth Storm-Wards:** Light Wildfire Storm-Wards on Hearths (`10` Build Packs + `2` Wildfire Essence) for **`-45` Forest Hostility** per upgraded Hearth to offset endless yearly hostility scaling.
-- **Grand Orders I–III (Difficulty-Scaled Citadel Payouts):** Complete three sequential industrial commissions to bank permanent Smoldering City currencies (**Food Stockpiles**, **Machinery**, **Artifacts** — scaled automatically by your settlement's **Difficulty Multiplier** and Smoldering City `%` bonus) plus **Cycle-long Caravan Boons** (`+2` Bonus Embarkation Points & `+1` Bonus Starting Villager across Charters II & III).
-- **Excess Reputation Acclaim:** Surplus Reputation earned past Victory (from **High Resolve**, **Abandoned Caches**, **Glade Events**, remaining **Orders**, and **Perks**) continues to fill an Overtime Acclaim meter (visible on the Reputation Bar tooltip). Every `+1.0` Excess Reputation delivers **`+15` Amber** and banks **`+3` Citadel Food Stockpiles** (Difficulty-scaled), with every **3rd** milestone triggering a **Major Acclaim** (`+1` Wildfire Essence, `+1` Machinery, and `+1` Artifact).
-- **Move-On Summary:** Clicking **Move On** in the pause menu displays a compact summary of all Citadel currencies, Excess Reputation milestones, and Cycle boons banked during Overtime.
+- **Grand Orders I–IV (Difficulty-Scaled Citadel & Seal Payouts):** Complete four sequential industrial commissions to bank permanent Smoldering City currencies (**Food Stockpiles**, **Machinery**, **Artifacts** — scaled automatically by your settlement's **Difficulty Multiplier** and Smoldering City `%` bonus), **Cycle-long Caravan Boons** (`+2` Bonus Embarkation Points & `+1` Bonus Starting Villager across Charters II & III), and **Cycle Seal Fragments / Shards** (`+1` base scaled by Difficulty on Charter IV).
+- **Excess Reputation Acclaim:** Surplus Reputation earned past Victory (from **High Resolve**, **Abandoned Caches**, **Glade Events**, remaining **Orders**, and **Perks**) continues to fill an Overtime Acclaim meter (visible on the Reputation Bar tooltip). Every `+1.0` Excess Reputation delivers **`+15` Amber** and banks **`+3` Citadel Food Stockpiles** (Difficulty-scaled), with every **3rd** milestone triggering a **Major Acclaim** (`+1` Wildfire Essence plus **`+1` Cycle Embarkation Point** up to a configurable cap of `2` per settlement, then falling back to Difficulty-scaled **Machinery & Artifacts**).
+- **Move-On Summary:** Clicking **Move On** in the pause menu displays a compact summary of all Citadel currencies, Seal Fragments, Excess Reputation milestones, and Cycle boons banked during Overtime.
+
+---
+
+## Save Compatibility & Reverting to Vanilla
+
+- **Finished Settlements Are Natively Vanilla-Safe:** Once you finish a settlement (**Move On** / return to the World Map), your `MetaSave.save` and `WorldSave.save` contain zero custom mod IDs — you can disable the mod and continue your Cycle and Citadel in vanilla with all earned currencies, Seal Fragments, and Embarkation Boons intact.
+- **Reverting an Active In-Progress Settlement (In-Game):** Open the Pause Menu (`Esc`) and use the two-step **`Prepare Save for Vanilla (Uninstall Helper)...`** → **`Confirm Revert to Vanilla`** control. It automatically creates a timestamped backup folder, converts Imperial Highways to Reinforced Roads, restores star-upgraded recipes to their vanilla base recipes, removes Overtime Grand Orders/Storm-Wards, and saves cleanly so you can exit and disable the mod.
+- **Offline Save Rescue Script:** If you already uninstalled the mod and hit an infinite loading spinner on an active settlement, run [scripts/revert-save-to-vanilla.ps1](scripts/revert-save-to-vanilla.ps1) (`-DryRun` supported) to back up and clean your save folder automatically.
 
 ---
 

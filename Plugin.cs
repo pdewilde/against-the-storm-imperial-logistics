@@ -67,7 +67,10 @@ namespace ATS_ImperialLogistics
         {
             try
             {
+                VanillaSaveConverter.OnSettlementEnded();
                 SettlementModState.LoadForSession(isNewSettlement);
+                VanillaSaveConverter.SanitizeMetaAndWorldSavesInMemory();
+                WorkshopMasteryManager.SyncRecipeMapToState();
                 SmartSupplyChainManager.OnSettlementStarted();
                 SmartCampAutoMover.OnSettlementStarted();
                 ImperialHighwayManager.OnSettlementStarted();
@@ -90,11 +93,12 @@ namespace ATS_ImperialLogistics
                 {
                     _settlementReady = false;
                     ImperialOvertimeManager.OnSettlementEnded();
+                    VanillaSaveConverter.OnSettlementEnded();
                 }
                 return;
             }
 
-            if (!_settlementReady || Time.unscaledTime < _nextSlowTickTime)
+            if (!_settlementReady || VanillaSaveConverter.IsRevertLocked || Time.unscaledTime < _nextSlowTickTime)
             {
                 return;
             }
