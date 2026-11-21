@@ -55,6 +55,12 @@ namespace ATS_ImperialLogistics
         public static ConfigEntry<int> Wave3BonusEmbarkPoints;
         public static ConfigEntry<int> Wave3BonusCycleVillagers;
 
+        // Excess Reputation Rewards in Overtime
+        public static ConfigEntry<bool> EnableOvertimeExcessReputation;
+        public static ConfigEntry<int> ExcessReputationAmberReward;
+        public static ConfigEntry<int> ExcessReputationBreadReward;
+        public static ConfigEntry<int> ExcessReputationBonusEveryN;
+
         // Pillar 5: Imperial Highways (Available Anytime)
         public static ConfigEntry<bool> EnableImperialHighways;
         public static ConfigEntry<float> HighwaySpeedBonus;
@@ -189,6 +195,19 @@ namespace ATS_ImperialLogistics
             Wave3BonusCycleVillagers = config.Bind(
                 "4. Continue Settlement Overtime", "Wave3BonusCycleVillagers", 1,
                 new ConfigDescription("Bonus Starting Villagers for remaining Cycle granted by Grand Order III.", new AcceptableValueRange<int>(0, 10)));
+
+            EnableOvertimeExcessReputation = config.Bind(
+                "4. Continue Settlement Overtime", "EnableOvertimeExcessReputation", true,
+                "Reward surplus Reputation earned past Victory (from High Resolve, Caches, Glade Events, Orders, and Perks) during Continue Settlement.");
+            ExcessReputationAmberReward = config.Bind(
+                "4. Continue Settlement Overtime", "ExcessReputationAmberReward", 15,
+                new ConfigDescription("Amber delivered to Main Warehouse for every +1.0 Excess Reputation earned in Overtime.", new AcceptableValueRange<int>(0, 200)));
+            ExcessReputationBreadReward = config.Bind(
+                "4. Continue Settlement Overtime", "ExcessReputationBreadReward", 3,
+                new ConfigDescription("Base (1.0x Settler) Citadel Food Stockpiles banked permanently for every +1.0 Excess Reputation earned in Overtime.", new AcceptableValueRange<int>(0, 50)));
+            ExcessReputationBonusEveryN = config.Bind(
+                "4. Continue Settlement Overtime", "ExcessReputationBonusEveryN", 3,
+                new ConfigDescription("Every Nth Excess Reputation milestone also awards a Major Acclaim bonus (+1 Wildfire Essence, +1 Machinery, +1 Artifact; scaled by Difficulty).", new AcceptableValueRange<int>(1, 20)));
 
             EnableImperialHighways = config.Bind(
                 "5. Imperial Highways", "EnableImperialHighways", true,

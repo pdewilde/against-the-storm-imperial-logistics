@@ -57,6 +57,8 @@ namespace ATS_ImperialLogistics.Persistence
         public int OvertimeBankedArtifacts = 0;
         public int OvertimeBankedEmbarkPoints = 0;
         public int OvertimeBankedCycleVillagers = 0;
+        public float OvertimeExcessReputationProgress = 0f;
+        public int OvertimeExcessReputationMilestones = 0;
 
         public void Normalize()
         {

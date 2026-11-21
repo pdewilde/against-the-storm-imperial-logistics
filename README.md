@@ -20,7 +20,7 @@ Select any finished Workshop to access its **Mastery Dock**:
 - **Curated 4th Bonus Recipe (`★1`):** Unlock 1 thematic bonus recipe per workshop (`4` Build Packs on starter workshops like *Flour* on Field Kitchen & *Barrels* on Crude Workstation; `6` Build Packs on blueprint workshops).
 
 ### 3. Imperial Highways, Smart Camp Auto-Move & Haulers
-- **Imperial Highways (Available Anytime):** Unlocked from Year 1 in the **Roads** build tab (`1 Pack of Building Materials` per tile). Grants **`+45%` Villager Walk Speed** by default (configurable live up to **`+500%`**) and can be dragged directly over Dirt, Paved, or Reinforced Roads to upgrade them in place.
+- **Imperial Highways (Available Anytime):** Unlocked from Year 1 in the **Roads** build tab (`1 Pack of Building Materials` per tile) with distinct **gilded royal-gold flagstones** and matching build icon so they stand out clearly from Reinforced Roads. Grants **`+45%` Villager Walk Speed** by default (configurable live up to **`+500%`**) and can be dragged directly over Dirt, Paved, or Reinforced Roads to upgrade them in place.
 - **Smart Camp Auto-Move:** Unlockable on **Woodcutters' Camps** (`3` Build Packs) and **Gathering Camps** (`4` Build Packs) with an `Active / Paused` toggle and `Scout & Move Now` button. Relocates idle depleted camps onto path-reachable terrain near valid targets closest to Warehouses while strictly obeying your Woodcutter **Glade Safety Mode** (*Avoid Glades*, *Only Marked*, etc.).
 - **Outpost Carts (Tier 2 Camp Upgrade):** Spend `4` Trade Packs + `1` Wildfire Essence for `+5` camp carry capacity and `+20%` gathering speed.
 - **Warehouse Hauler Automatons:** Deploy an autonomous Hauler Bot plus `+5` carry capacity & `+5` range on any Main/Small Warehouse (`8` Build Packs + `6` Trade Packs + `1` Wildfire Essence).
@@ -29,7 +29,8 @@ Select any finished Workshop to access its **Mastery Dock**:
 Clicking **Continue Settlement** after winning (including **Sealed Forest** victories) activates **Imperial Overtime**:
 - **Hearth Storm-Wards:** Light Wildfire Storm-Wards on Hearths (`10` Build Packs + `2` Wildfire Essence) for **`-45` Forest Hostility** per upgraded Hearth to offset endless yearly hostility scaling.
 - **Grand Orders I–III (Difficulty-Scaled Citadel Payouts):** Complete three sequential industrial commissions to bank permanent Smoldering City currencies (**Food Stockpiles**, **Machinery**, **Artifacts** — scaled automatically by your settlement's **Difficulty Multiplier** and Smoldering City `%` bonus) plus **Cycle-long Caravan Boons** (`+2` Bonus Embarkation Points & `+1` Bonus Starting Villager across Charters II & III).
-- **Move-On Summary:** Clicking **Move On** in the pause menu displays a compact summary of all Citadel currencies and Cycle boons banked during Overtime.
+- **Excess Reputation Acclaim:** Surplus Reputation earned past Victory (from **High Resolve**, **Abandoned Caches**, **Glade Events**, remaining **Orders**, and **Perks**) continues to fill an Overtime Acclaim meter (visible on the Reputation Bar tooltip). Every `+1.0` Excess Reputation delivers **`+15` Amber** and banks **`+3` Citadel Food Stockpiles** (Difficulty-scaled), with every **3rd** milestone triggering a **Major Acclaim** (`+1` Wildfire Essence, `+1` Machinery, and `+1` Artifact).
+- **Move-On Summary:** Clicking **Move On** in the pause menu displays a compact summary of all Citadel currencies, Excess Reputation milestones, and Cycle boons banked during Overtime.
 
 ---
 
@@ -69,9 +70,7 @@ Active development on this mod may be limited going forward, so forks, pull requ
 
 - **Feature & Economy Balance:** Fine-tuning pack/essence upgrade costs, reserve floors, intermediate cap formulas, highway speed bonuses, and Overtime payout curves across all Prestige tiers.
 - **Roguelike Variety in Overtime:** Procedural/randomized late-game Grand Order objectives and reward pools so every Continue Settlement run feels fresh.
-- **Excess Reputation Rewards:** Rewarding surplus Reputation earned past the Victory threshold (from high Resolve, caches, and glade events) with bonus supplies, perks, or Citadel payouts.
 - **Native Building Upgrade UI Integration:** Migrating custom docked upgrade rows into *Against the Storm*'s native building upgrade menu/tab instead of drawing external boxes alongside building panels.
-- **Distinct Imperial Highway Visuals:** Custom terrain texture/tint so Tier 4 Imperial Highways are visually distinct on the map from Tier 3 Reinforced Roads.
 - **DLC Testing & Integration:** Thorough testing and bonus recipe/upgrade coverage across *Keepers of the Stone* and other DLC content.
 
 ---

@@ -25,6 +25,10 @@ namespace ATS_ImperialLogistics.Helpers
         public static IOrdersService Orders => OrdersService;
         public static IRecipesService Recipes => RecipesService;
         public static IReputationService Reputation => ReputationService;
+        public static IResolveService Resolve => ResolveService;
+        public static IRacesService Races => RacesService;
+        public static IVillagersService Villagers => VillagersService;
+        public static IEffectsService Effects => EffectsService;
         public static IHostilityService Hostility => HostilityService;
         public static IAutomatonsService Automatons => AutomatonsService;
         public static INewsService News => NewsService;

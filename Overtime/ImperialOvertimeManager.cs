@@ -17,6 +17,7 @@ using Eremite.Model.Effects;
 using Eremite.Model.Orders;
 using Eremite.Services;
 using Eremite.Services.Monitors;
+using Eremite.View.HUD.Orders;
 using Eremite.View.Popups;
 using Eremite.WorldMap;
 using HarmonyLib;
@@ -41,6 +42,13 @@ namespace ATS_ImperialLogistics.Overtime
         private static MethodInfo _startOrderMethod;
         private static FieldInfo _orderPickedSubjectField;
         private static FieldInfo _orderTrackingSubjectField;
+
+        // Excess Reputation tracking (High Resolve + Events/Caches/Orders in Overtime)
+        private static readonly MethodInfo RrcGetRoundedResolveMethod = AccessTools.Method(typeof(ResolveReputationCalculator), "GetRoundedResolveFor");
+        private static readonly MethodInfo RrcCalculateReputationMethod = AccessTools.Method(typeof(ResolveReputationCalculator), "CalculateReputationFor");
+        private static readonly FieldInfo RepBarTooltipPositiveField = AccessTools.Field(typeof(ReputationBarTooltipTrigger), "positive");
+        private static float _lastResolveExcessRepPerSec;
+        private static float _lastExcessRepSaveTime;
 
         public static bool IsInOvertime()
         {
@@ -259,6 +267,8 @@ namespace ATS_ImperialLogistics.Overtime
         {
             _orderCompletedSub?.Dispose();
             _orderCompletedSub = null;
+            _lastResolveExcessRepPerSec = 0f;
+            _lastExcessRepSaveTime = 0f;
         }
 
         public static void Tick()
@@ -708,11 +718,215 @@ namespace ATS_ImperialLogistics.Overtime
                 null);
         }
 
+        public static bool IsExcessReputationActive()
+        {
+            return Svc.Active
+                && ModConfig.EnableImperialOvertime.Value
+                && ModConfig.EnableOvertimeExcessReputation.Value
+                && IsInOvertime()
+                && SettlementModState.Current.OvertimeInitialized;
+        }
+
+        public static void TickResolveExcessReputation(ResolveReputationCalculator calculator)
+        {
+            if (calculator == null || !IsExcessReputationActive() || Time.timeScale <= 0f)
+            {
+                _lastResolveExcessRepPerSec = 0f;
+                return;
+            }
+
+            if (Svc.Effects != null && Svc.Effects.IsReputationFromResolveBlocked())
+            {
+                _lastResolveExcessRepPerSec = 0f;
+                return;
+            }
+
+            var races = Svc.Races?.Races;
+            if (races == null || Svc.Villagers == null || RrcGetRoundedResolveMethod == null || RrcCalculateReputationMethod == null)
+            {
+                return;
+            }
+
+            float dt = Mathf.Clamp(Time.deltaTime, 0f, 0.25f);
+            float totalPerSec = 0f;
+
+            for (int i = 0; i < races.Length; i++)
+            {
+                var race = races[i];
+                if (race == null) continue;
+
+                int pop = Svc.Villagers.GetRaceAmount(race.Name);
+                if (pop <= 0) continue;
+
+                int roundedResolve = (int)RrcGetRoundedResolveMethod.Invoke(calculator, new object[] { race });
+                float perSec = (float)RrcCalculateReputationMethod.Invoke(calculator, new object[] { race, (float)roundedResolve, pop, 1f });
+                if (perSec > 0f)
+                {
+                    totalPerSec += perSec;
+                }
+            }
+
+            _lastResolveExcessRepPerSec = totalPerSec;
+            if (totalPerSec > 0f && dt > 0f)
+            {
+                RecordExcessReputation(totalPerSec * dt, ReputationChangeSource.Resolve, "High Resolve");
+            }
+        }
+
+        public static void RecordExcessReputation(float amount, ReputationChangeSource source, string reason)
+        {
+            if (amount <= 0f || !IsExcessReputationActive())
+            {
+                return;
+            }
+
+            var state = SettlementModState.Current;
+            state.OvertimeExcessReputationProgress += amount;
+
+            int granted = 0;
+            while (state.OvertimeExcessReputationProgress >= 1f)
+            {
+                state.OvertimeExcessReputationProgress -= 1f;
+                state.OvertimeExcessReputationMilestones++;
+                GrantExcessReputationMilestone(state.OvertimeExcessReputationMilestones, source);
+                granted++;
+            }
+
+            if (granted > 0)
+            {
+                SettlementModState.FlushToDisk(force: true);
+                _lastExcessRepSaveTime = Time.unscaledTime;
+            }
+            else if (source != ReputationChangeSource.Resolve || Time.unscaledTime - _lastExcessRepSaveTime >= 10f)
+            {
+                SettlementModState.Save();
+                _lastExcessRepSaveTime = Time.unscaledTime;
+            }
+        }
+
+        private static void GrantExcessReputationMilestone(int milestone, ReputationChangeSource source)
+        {
+            int majorEvery = Math.Max(1, ModConfig.ExcessReputationBonusEveryN.Value);
+            bool isMajor = (milestone % majorEvery == 0);
+
+            int amber = Math.Max(0, ModConfig.ExcessReputationAmberReward.Value);
+            int wildfire = isMajor ? 1 : 0;
+            int bread = ScaleMetaCurrency(MetaCurrencyTypes.Food_Stockpiles, Math.Max(0, ModConfig.ExcessReputationBreadReward.Value));
+            int machinery = isMajor ? ScaleMetaCurrency(MetaCurrencyTypes.Machinery, 1) : 0;
+            int artifacts = isMajor ? ScaleMetaCurrency(MetaCurrencyTypes.Artifacts, 1) : 0;
+
+            try
+            {
+                if (Svc.Storage != null)
+                {
+                    if (amber > 0)
+                    {
+                        Svc.Storage.Store(new Good(GoodsTypes.Valuable_Amber.ToName(), amber), StorageOperationType.Effect);
+                    }
+                    if (wildfire > 0)
+                    {
+                        Svc.Storage.Store(new Good(GoodsTypes.Hearth_Parts.ToName(), wildfire), StorageOperationType.Effect);
+                    }
+                }
+
+                if (Svc.MetaEconomy != null)
+                {
+                    if (bread > 0)
+                    {
+                        Svc.MetaEconomy.Add(new MetaCurrency(MetaCurrencyTypes.Food_Stockpiles.ToName(), bread));
+                    }
+                    if (machinery > 0)
+                    {
+                        Svc.MetaEconomy.Add(new MetaCurrency(MetaCurrencyTypes.Machinery.ToName(), machinery));
+                    }
+                    if (artifacts > 0)
+                    {
+                        Svc.MetaEconomy.Add(new MetaCurrency(MetaCurrencyTypes.Artifacts.ToName(), artifacts));
+                    }
+                }
+
+                Svc.MetaState?.SaveState();
+                Svc.MetaState?.SaveGameWonBackup();
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogError($"Failed granting Excess Reputation milestone #{milestone}: {ex}");
+            }
+
+            var state = SettlementModState.Current;
+            state.OvertimeBankedBread += bread;
+            state.OvertimeBankedMachinery += machinery;
+            state.OvertimeBankedArtifacts += artifacts;
+
+            var parts = new List<string>();
+            if (amber > 0) parts.Add($"+{amber} Amber");
+            if (wildfire > 0) parts.Add($"+{wildfire} Wildfire Essence");
+            if (bread > 0) parts.Add($"+{bread} Citadel Food Stockpiles");
+            if (machinery > 0) parts.Add($"+{machinery} Machinery");
+            if (artifacts > 0) parts.Add($"+{artifacts} Artifact{(artifacts == 1 ? string.Empty : "s")}");
+
+            string diffTag = GetDifficultyLabel();
+            string summary = parts.Count > 0 ? string.Join(", ", parts) : "Acclaim recorded";
+            string title = isMajor
+                ? $"Grand Imperial Acclaim #{milestone} (Excess Reputation!)"
+                : $"Imperial Acclaim #{milestone} (Excess Reputation)";
+
+            Plugin.Log.LogInfo($"[Imperial Overtime] {title} via {source}{diffTag}: {summary}");
+
+            var iconGood = isMajor ? GoodsTypes.Hearth_Parts : GoodsTypes.Valuable_Amber;
+            Svc.News?.PublishNews(
+                title,
+                $"Awarded{diffTag}: {summary}.",
+                AlertSeverity.Info,
+                iconGood.ToGoodModel()?.icon,
+                null);
+        }
+
+        public static bool TryBuildExcessReputationTooltip(ReputationBarTooltipTrigger trigger, out string desc)
+        {
+            desc = null;
+            if (trigger == null || !IsExcessReputationActive())
+            {
+                return false;
+            }
+
+            bool isPositive = RepBarTooltipPositiveField != null && (bool)RepBarTooltipPositiveField.GetValue(trigger);
+            if (!isPositive)
+            {
+                return false;
+            }
+
+            var state = SettlementModState.Current;
+            int earned = state.OvertimeExcessReputationMilestones;
+            int pct = Mathf.Clamp(Mathf.FloorToInt(state.OvertimeExcessReputationProgress * 100f), 0, 99);
+            float perMin = _lastResolveExcessRepPerSec * 60f;
+
+            int amber = Math.Max(0, ModConfig.ExcessReputationAmberReward.Value);
+            int bread = ScaleMetaCurrency(MetaCurrencyTypes.Food_Stockpiles, Math.Max(0, ModConfig.ExcessReputationBreadReward.Value));
+            int majorEvery = Math.Max(1, ModConfig.ExcessReputationBonusEveryN.Value);
+            int nextMilestone = earned + 1;
+            int toMajor = majorEvery - (earned % majorEvery);
+            bool nextIsMajor = (nextMilestone % majorEvery == 0);
+
+            string majorLine = nextIsMajor
+                ? $"<color=#FFD966>Next (#{nextMilestone}) is a Major Acclaim:</color> +1 Wildfire Essence, +{ScaleMetaCurrency(MetaCurrencyTypes.Machinery, 1)} Machinery & +{ScaleMetaCurrency(MetaCurrencyTypes.Artifacts, 1)} Artifact!"
+                : $"Major Acclaim (+1 Wildfire Essence, Machinery & Artifact) in {toMajor} pt{(toMajor == 1 ? string.Empty : "s")}.";
+
+            desc = $"<color=#FFD966><b>Imperial Overtime Acclaim:</b></color> {earned} earned ({pct}% to #{nextMilestone})"
+                + $"\nResolve Gain: <b>+{perMin:F2} / min</b> (also counts Caches, Events & Orders)"
+                + $"\nPer +1.0 Rep: +{amber} Amber, +{bread} Citadel Food Stockpiles"
+                + $"\n{majorLine}";
+            return true;
+        }
+
         public static string BuildOvertimeMoveOnSummary(string vanillaDesc)
         {
             var state = SettlementModState.Current;
             var completed = state.CompletedGrandOrderWaves;
-            if (completed == null || completed.Count == 0)
+            int charterCount = completed?.Count ?? 0;
+            int excessMilestones = state.OvertimeExcessReputationMilestones;
+
+            if (charterCount == 0 && excessMilestones == 0)
             {
                 return $"{vanillaDesc}\n<size=85%><color=#FFD966><b>Imperial Overtime:</b></color> 0/3 Charters completed.</size>";
             }
@@ -724,7 +938,7 @@ namespace ATS_ImperialLogistics.Overtime
             int totalCycleVillagers = state.OvertimeBankedCycleVillagers;
 
             // Fallback for older state files created before cumulative banked fields existed
-            if (totalBread == 0 && totalMachinery == 0 && totalArtifacts == 0)
+            if (totalBread == 0 && totalMachinery == 0 && totalArtifacts == 0 && charterCount > 0)
             {
                 if (completed.Contains(1)) totalBread += ScaleMetaCurrency(MetaCurrencyTypes.Food_Stockpiles, Math.Max(0, ModConfig.Wave1BreadReward.Value));
                 if (completed.Contains(2))
@@ -754,8 +968,12 @@ namespace ATS_ImperialLogistics.Overtime
 
             // Replace vanilla boilerplate with a compact 3-line summary so DecisionPopup's fixed-height centered box never overflows
             string diffTag = GetDifficultyLabel();
-            string text = $"<size=88%><color=#FFD966><b>Imperial Overtime — {completed.Count}/3 Charters{diffTag}</b></color>"
-                + $"\n<b>Citadel Banked:</b> {string.Join(", ", treasuryLines)}";
+            string excessTag = excessMilestones > 0 ? $" • {excessMilestones} Excess Rep" : string.Empty;
+            string text = $"<size=88%><color=#FFD966><b>Imperial Overtime — {charterCount}/3 Charters{excessTag}{diffTag}</b></color>";
+            if (treasuryLines.Count > 0)
+            {
+                text += $"\n<b>Citadel Banked:</b> {string.Join(", ", treasuryLines)}";
+            }
 
             if (cycleLines.Count > 0)
             {
@@ -1081,6 +1299,54 @@ namespace ATS_ImperialLogistics.Overtime
             catch (Exception ex)
             {
                 Plugin.Log.LogError($"Error in MoveOn prefix: {ex}");
+            }
+        }
+
+        [HarmonyPatch(typeof(ReputationService), nameof(ReputationService.AddReputationPoints))]
+        [HarmonyPrefix]
+        private static void ReputationService_AddReputationPoints_Prefix(float amount, ReputationChangeSource type, string reason)
+        {
+            try
+            {
+                if (amount > 0f && ImperialOvertimeManager.IsExcessReputationActive())
+                {
+                    ImperialOvertimeManager.RecordExcessReputation(amount, type, reason);
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning($"Error recording Overtime excess reputation: {ex.Message}");
+            }
+        }
+
+        [HarmonyPatch(typeof(ResolveReputationCalculator), "Update")]
+        [HarmonyPostfix]
+        private static void ResolveReputationCalculator_Update_Postfix(ResolveReputationCalculator __instance)
+        {
+            try
+            {
+                ImperialOvertimeManager.TickResolveExcessReputation(__instance);
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning($"Error ticking Resolve excess reputation in Overtime: {ex.Message}");
+            }
+        }
+
+        [HarmonyPatch(typeof(ReputationBarTooltipTrigger), "GetDesc")]
+        [HarmonyPostfix]
+        private static void ReputationBarTooltipTrigger_GetDesc_Postfix(ReputationBarTooltipTrigger __instance, ref string __result)
+        {
+            try
+            {
+                if (ImperialOvertimeManager.TryBuildExcessReputationTooltip(__instance, out string excessDesc))
+                {
+                    __result = excessDesc;
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning($"Error building Excess Reputation bar tooltip: {ex.Message}");
             }
         }
     }
