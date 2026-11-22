@@ -1130,7 +1130,7 @@ namespace ATS_ImperialLogistics.Overtime
                 Svc.MetaState?.SaveState();
                 Svc.WorldState?.SaveState();
                 int count = SettlementModState.Current.CompletedGrandOrderWaves?.Count ?? 0;
-                Plugin.Log.LogInfo($"[Imperial Overtime] Moving On to World Map — {count}/3 Grand Orders completed and saved to MetaSave & WorldSave.");
+                Plugin.Log.LogInfo($"[Imperial Overtime] Moving On to World Map — {count}/4 Grand Orders completed and saved to MetaSave & WorldSave.");
             }
             catch (Exception ex)
             {
@@ -1163,7 +1163,7 @@ namespace ATS_ImperialLogistics.Overtime
                 ImperialUiHelper.CreateStyledButton(
                     row,
                     "BtnWardActive",
-                    $"<color=#FFD966>✓ Imperial Storm-Ward Lit (-{shownReduction} Hostility)</color>",
+                    $"<color=#FFD966>[Active] Imperial Storm-Ward Lit (-{shownReduction} Hostility)</color>",
                     false,
                     null,
                     minWidth: 260f);
@@ -1272,7 +1272,7 @@ namespace ATS_ImperialLogistics.Overtime
                 ImperialUiHelper.CreateStyledButton(
                     row,
                     "BtnAutomatonActive",
-                    "<color=#FFD966>✓ Hauler Automaton & +5 Carry Capacity Active</color>",
+                    "<color=#FFD966>[Active] Hauler Automaton & +5 Carry Capacity</color>",
                     false,
                     null,
                     minWidth: 270f);

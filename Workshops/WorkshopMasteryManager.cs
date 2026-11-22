@@ -668,7 +668,7 @@ namespace ATS_ImperialLogistics.Workshops
                         ? bonusRecipe.producedGood.DisplayName
                         : bonusRecipe.GetProducedGood();
 
-                    string btnText = $"<b>+ Unlock {goodLabel} (★1)</b>  [{EconomyHelper.FormatCostSummary(costs)}]";
+                    string btnText = $"<b>+ Unlock {goodLabel} (1*)</b>  [{EconomyHelper.FormatCostSummary(costs)}]";
                     ImperialUiHelper.CreateStyledButton(
                         rowBonus,
                         "BtnUnlockFourth",
@@ -709,7 +709,7 @@ namespace ATS_ImperialLogistics.Workshops
                     ImperialUiHelper.CreateStyledButton(
                         currentRow,
                         $"BtnMax_{rState.productName}",
-                        $"<color=#FFD966>★3 {goodDisplay} (Mastered)</color>",
+                        $"<color=#FFD966>[3*] {goodDisplay} (Mastered)</color>",
                         false,
                         null,
                         minWidth: 165f,
@@ -723,7 +723,7 @@ namespace ATS_ImperialLogistics.Workshops
                     bool canAfford = EconomyHelper.CanAfford(costs);
                     var capturedState = rState;
 
-                    string label = $"<b>{goodDisplay} ★{curLvl}→★{nextLvl}</b> ({EconomyHelper.FormatCostSummary(costs)})";
+                    string label = $"<b>{goodDisplay} {curLvl}* -> {nextLvl}*</b> ({EconomyHelper.FormatCostSummary(costs)})";
                     ImperialUiHelper.CreateStyledButton(
                         currentRow,
                         $"BtnUpg_{rState.productName}",

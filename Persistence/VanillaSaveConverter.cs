@@ -142,7 +142,7 @@ namespace ATS_ImperialLogistics.Persistence
             if (IsRevertLocked)
             {
                 string msg = string.IsNullOrEmpty(_lastStatusBanner)
-                    ? "<color=#9BF09B>✓ Reverted to Vanilla! Backup created — Exit Game & disable mod.</color>"
+                    ? "<color=#9BF09B>[Done] Reverted to Vanilla! Backup created — Exit Game & disable mod.</color>"
                     : _lastStatusBanner;
                 ImperialUiHelper.CreateStyledButton(
                     row,
@@ -392,7 +392,7 @@ namespace ATS_ImperialLogistics.Persistence
                 }
 
                 string backupLabel = !string.IsNullOrEmpty(backupDir) ? Path.GetFileName(backupDir) : "created";
-                _lastStatusBanner = $"<color=#9BF09B>✓ Reverted ({roadsReverted} roads, {recipesReverted} recipes, {ordersRemoved} orders) — Exit Game & disable mod!</color>";
+                _lastStatusBanner = $"<color=#9BF09B>[Done] Reverted ({roadsReverted} roads, {recipesReverted} recipes, {ordersRemoved} orders) — Exit Game & disable mod!</color>";
 
                 Plugin.Log.LogInfo(
                     $"[VanillaSaveConverter] Reverted active settlement to vanilla cleanly "

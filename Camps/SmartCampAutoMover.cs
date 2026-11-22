@@ -787,7 +787,7 @@ namespace ATS_ImperialLogistics.Camps
                 ImperialUiHelper.CreateStyledButton(
                     row2,
                     "BtnCartsOwned",
-                    "<color=#FFD966>✓ Outpost Carts Active (+5 Carry, +20% Speed)</color>",
+                    "<color=#FFD966>[Active] Outpost Carts (+5 Carry, +20% Speed)</color>",
                     false,
                     null,
                     minWidth: 250f,
