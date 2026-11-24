@@ -169,7 +169,7 @@ namespace ATS_ImperialLogistics.UI
             {
                 pos.SetRefreshCallback(liveRebuildCallback);
                 pos.MarkDirty();
-                pos.RepositionNow();
+                pos.RepositionNow(skipHorizontalScreenClamp: true);
             }
         }
 
@@ -298,7 +298,10 @@ namespace ATS_ImperialLogistics.UI
         private int _lastStockSignature;
         private int _lastActiveChildMask = -1;
         private Vector2 _lastContentSize;
+        private Vector3 _lastContentWorldPos;
         private int _dirtyFrames = 5;
+        private float _settleUntilTime;
+        private bool _needsSettledClamp;
         private float _nextPeriodicCheckTime;
         private bool _isRebuilding;
 
@@ -307,7 +310,10 @@ namespace ATS_ImperialLogistics.UI
             _contentRect = contentRect;
             _dockRect = dockRect;
             _mainPanelRect = contentRect != null ? contentRect.Find("MainPanel") as RectTransform : null;
+            _lastContentWorldPos = contentRect != null ? contentRect.position : Vector3.zero;
             _dirtyFrames = 5;
+            _settleUntilTime = Time.unscaledTime + 0.45f;
+            _needsSettledClamp = true;
         }
 
         public void SetRefreshCallback(Action liveRebuildCallback)
@@ -320,13 +326,18 @@ namespace ATS_ImperialLogistics.UI
         {
             _dirtyFrames = 5;
             _lastActiveChildMask = -1;
+            _lastContentWorldPos = _contentRect != null ? _contentRect.position : Vector3.zero;
             _lastStockSignature = EconomyHelper.GetUpgradeGoodsSignature();
+            _settleUntilTime = Time.unscaledTime + 0.45f;
+            _needsSettledClamp = true;
             _nextPeriodicCheckTime = Time.unscaledTime + 0.25f;
         }
 
         public void MarkDirty()
         {
             _dirtyFrames = 3;
+            _settleUntilTime = Mathf.Max(_settleUntilTime, Time.unscaledTime + 0.35f);
+            _needsSettledClamp = true;
         }
 
         private void LateUpdate()
@@ -336,10 +347,36 @@ namespace ATS_ImperialLogistics.UI
                 return;
             }
 
+            // Detect panel slide-in / reposition animations so the dock stays glued to MainPanel
+            // and performs a final settled pass once the DOTween animation finishes.
+            Vector3 currentPos = _contentRect.position;
+            bool isMoving = (currentPos - _lastContentWorldPos).sqrMagnitude > 0.01f;
+            if (isMoving)
+            {
+                _lastContentWorldPos = currentPos;
+                _dirtyFrames = Math.Max(_dirtyFrames, 2);
+                _settleUntilTime = Mathf.Max(_settleUntilTime, Time.unscaledTime + 0.15f);
+                _needsSettledClamp = true;
+            }
+
+            bool settling = isMoving || Time.unscaledTime < _settleUntilTime;
             if (_dirtyFrames > 0)
             {
                 _dirtyFrames--;
-                RepositionNow();
+                RepositionNow(skipHorizontalScreenClamp: settling);
+                if (!settling) _needsSettledClamp = false;
+                return;
+            }
+
+            if (settling)
+            {
+                return;
+            }
+
+            if (_needsSettledClamp)
+            {
+                _needsSettledClamp = false;
+                RepositionNow(skipHorizontalScreenClamp: false);
                 return;
             }
 
@@ -396,7 +433,7 @@ namespace ATS_ImperialLogistics.UI
             return mask;
         }
 
-        public void RepositionNow()
+        public void RepositionNow(bool skipHorizontalScreenClamp = false)
         {
             if (_contentRect == null || _dockRect == null)
             {
@@ -405,6 +442,7 @@ namespace ATS_ImperialLogistics.UI
 
             _lastActiveChildMask = ComputeActiveChildMask();
             _lastContentSize = _contentRect.rect.size;
+            _lastContentWorldPos = _contentRect.position;
 
             if (_mainPanelRect == null)
             {
@@ -475,8 +513,12 @@ namespace ATS_ImperialLogistics.UI
                 Vector3 screenBottomLeft = _contentRect.InverseTransformPoint(CanvasCorners[0]);
                 Vector3 screenTopRight = _contentRect.InverseTransformPoint(CanvasCorners[2]);
 
-                // Keep inside right and left screen edges so wide docks never clip off-screen
-                targetRightX = Mathf.Min(targetRightX, screenTopRight.x - 10f);
+                // Only clamp against horizontal screen edges once the panel's slide-in animation has settled;
+                // clamping while Content is still off-screen right shifts the dock hundreds of pixels too far left!
+                if (!skipHorizontalScreenClamp)
+                {
+                    targetRightX = Mathf.Min(targetRightX, screenTopRight.x - 10f);
+                }
 
                 // If the building panel is very tall (e.g., Main Warehouse scroll view) and placing below would clip near the bottom,
                 // dock neatly 8px to the LEFT of the building panel instead.
@@ -486,7 +528,10 @@ namespace ATS_ImperialLogistics.UI
                     targetTopY = Mathf.Min(hasMain ? mainMaxY : allMaxY, screenTopRight.y - 75f);
                 }
 
-                targetRightX = Mathf.Max(targetRightX, screenBottomLeft.x + targetWidth + 10f);
+                if (!skipHorizontalScreenClamp)
+                {
+                    targetRightX = Mathf.Max(targetRightX, screenBottomLeft.x + targetWidth + 10f);
+                }
             }
 
             _dockRect.anchorMin = _contentRect.pivot;
