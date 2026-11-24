@@ -40,6 +40,7 @@ namespace ATS_ImperialLogistics.Helpers
         public static IBiomeService BiomeSvc => BiomeService;
 
         // Meta & World Services
+        public static ITextsService Texts => TextsService;
         public static IProfilesService Profiles => ProfilesService;
         public static IMetaEconomyService MetaEconomy => MetaEconomyService;
         public static IMetaPerksService MetaPerks => MetaPerksService;

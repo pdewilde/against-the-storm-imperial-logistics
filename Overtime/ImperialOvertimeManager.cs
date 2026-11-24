@@ -17,9 +17,12 @@ using Eremite.Model.Effects;
 using Eremite.Model.Orders;
 using Eremite.Services;
 using Eremite.Services.Monitors;
+using Eremite.View;
 using Eremite.View.HUD.Orders;
+using Eremite.View.HUD.Result;
 using Eremite.View.Popups;
 using Eremite.WorldMap;
+using TMPro;
 using HarmonyLib;
 using UniRx;
 using UnityEngine;
@@ -49,6 +52,7 @@ namespace ATS_ImperialLogistics.Overtime
         private static readonly MethodInfo RrcGetRoundedResolveMethod = AccessTools.Method(typeof(ResolveReputationCalculator), "GetRoundedResolveFor");
         private static readonly MethodInfo RrcCalculateReputationMethod = AccessTools.Method(typeof(ResolveReputationCalculator), "CalculateReputationFor");
         private static readonly FieldInfo RepBarTooltipPositiveField = AccessTools.Field(typeof(ReputationBarTooltipTrigger), "positive");
+        private static readonly FieldInfo ResultPopupDescTextField = AccessTools.Field(typeof(GameResultPopup), "descText");
         private static float _lastResolveExcessRepPerSec;
         private static float _lastExcessRepSaveTime;
 
@@ -1047,6 +1051,44 @@ namespace ATS_ImperialLogistics.Overtime
             return true;
         }
 
+        public static void ApplyVictoryContinueScreenText(GameResultPopup popup, bool hasWon)
+        {
+            if (popup == null || !hasWon || !ModConfig.EnableImperialOvertime.Value)
+            {
+                return;
+            }
+
+            var descText = ResultPopupDescTextField?.GetValue(popup) as TMP_Text;
+            if (descText == null)
+            {
+                return;
+            }
+
+            descText.text =
+                "You can continue to play on this map — deeds and XP are paused, but <color=#FFD966><b>Imperial Overtime</b></color> activates!\n"
+                + "Earn Citadel Resources, Seal Fragments, Cycle Embarkation Boons, and Hearth Storm-Wards via 4 Grand Orders and Excess Reputation.";
+        }
+
+        public static bool TryRewriteContinueConfirmPopup(ref string title, ref string desc)
+        {
+            if (!ModConfig.EnableImperialOvertime.Value || string.IsNullOrEmpty(desc))
+            {
+                return false;
+            }
+
+            string vanillaContinueDesc = Svc.Texts?.GetLocaText("GameUI_GameResult_Won_ContinuePopup_Description");
+            if (string.IsNullOrEmpty(vanillaContinueDesc) || !string.Equals(desc, vanillaContinueDesc, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            title = "ENTER IMPERIAL OVERTIME?";
+            desc =
+                "<size=90%>Additional deeds & XP are paused, but <color=#FFD966><b>Imperial Overtime</b></color> activates!\n"
+                + "Earn <b>Citadel Resources</b>, <b>Seal Fragments</b> & <b>Cycle Boons</b> through 4 Grand Orders and Excess Reputation, plus unlock <b>Hearth Storm-Wards</b>.</size>";
+            return true;
+        }
+
         public static string BuildOvertimeMoveOnSummary(string vanillaDesc)
         {
             var state = SettlementModState.Current;
@@ -1481,6 +1523,34 @@ namespace ATS_ImperialLogistics.Overtime
             catch (Exception ex)
             {
                 Plugin.Log.LogWarning($"Error building Excess Reputation bar tooltip: {ex.Message}");
+            }
+        }
+
+        [HarmonyPatch(typeof(GameResultPopup), "SetUpDynamicTexts")]
+        [HarmonyPostfix]
+        private static void GameResultPopup_SetUpDynamicTexts_Postfix(GameResultPopup __instance, bool hasWon)
+        {
+            try
+            {
+                ImperialOvertimeManager.ApplyVictoryContinueScreenText(__instance, hasWon);
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning($"Error updating Victory screen Overtime description: {ex.Message}");
+            }
+        }
+
+        [HarmonyPatch(typeof(DecisionPopup), nameof(DecisionPopup.Show))]
+        [HarmonyPrefix]
+        private static void DecisionPopup_Show_Prefix(ref string title, ref string desc)
+        {
+            try
+            {
+                ImperialOvertimeManager.TryRewriteContinueConfirmPopup(ref title, ref desc);
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning($"Error updating Continue Settlement Overtime popup: {ex.Message}");
             }
         }
     }
