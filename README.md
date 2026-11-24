@@ -2,6 +2,8 @@
 
 A comprehensive Quality-of-Life and Late-Game progression mod for *Against the Storm* that streamlines settlement logistics, lets you specialize workshops & camps using crafted packs, adds Tier 4 **Imperial Highways**, and turns **Continue Settlement** into a rewarding post-victory endgame.
 
+![Gilded Imperial Highway in Against the Storm](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/imperial-highway-banner.jpg)
+
 ---
 
 ## Features
@@ -38,7 +40,28 @@ Clicking **Continue Settlement** after winning (including **Sealed Forest** vict
 
 - **Finished Settlements Are Natively Vanilla-Safe:** Once you finish a settlement (**Move On** / return to the World Map), your `MetaSave.save` and `WorldSave.save` contain zero custom mod IDs — you can disable the mod and continue your Cycle and Citadel in vanilla with all earned currencies, Seal Fragments, and Embarkation Boons intact.
 - **Reverting an Active In-Progress Settlement (In-Game):** Open the Pause Menu (`Esc`) and use the two-step **`Prepare Save for Vanilla (Uninstall Helper)...`** → **`Confirm Revert to Vanilla`** control. It automatically creates a timestamped backup folder, converts Imperial Highways to Reinforced Roads, restores star-upgraded recipes to their vanilla base recipes, removes Overtime Grand Orders/Storm-Wards, and saves cleanly so you can exit and disable the mod.
-- **Offline Save Rescue Script:** If you already uninstalled the mod and hit an infinite loading spinner on an active settlement, run [scripts/revert-save-to-vanilla.ps1](scripts/revert-save-to-vanilla.ps1) (`-DryRun` supported) to back up and clean your save folder automatically.
+- **Offline Save Rescue Script:** If you already uninstalled the mod and hit an infinite loading spinner on an active settlement, run [scripts/revert-save-to-vanilla.ps1](https://github.com/pdewilde/against-the-storm-imperial-logistics/blob/main/scripts/revert-save-to-vanilla.ps1) (`-DryRun` supported) to back up and clean your save folder automatically.
+
+---
+
+## Screenshots
+
+### Building Docks — Workshop Mastery, Camp Auto-Move & Hearth Storm-Wards
+| Workshop Mastery & Smart Caps | Woodcutters' Camp Auto-Move | Hearth Storm-Ward (-45 Hostility) |
+| :---: | :---: | :---: |
+| ![Workshop Mastery Dock](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/workshop-mastery-dock.jpg) | ![Camp Auto-Move Dock](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/camp-automove-dock.jpg) | ![Hearth Storm-Ward Dock](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/hearth-storm-ward.jpg) |
+
+### Imperial Overtime — Grand Orders, Move-On Summary & Year XXI Megacity
+![Imperial Overtime Grand Orders](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/overtime-grand-orders.jpg)
+
+![Imperial Overtime Move-On Summary](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/overtime-move-on-summary.jpg)
+
+![Year XXI Overtime Economy](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/overtime-year21-economy.jpg)
+
+### Imperial Highways & Live In-Game Mod Options
+| Imperial Highway Build Menu & Tooltip | In-Game Mod Options & Sliders |
+| :---: | :---: |
+| ![Imperial Highway Tooltip](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/imperial-highway-tooltip.jpg) | ![In-Game Mod Options](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/mods-options.jpg) |
 
 ---
 
@@ -66,9 +89,9 @@ Building in `Release` compiles `ATS_ImperialLogistics.dll`, packages a Thunderst
 
 ### Bundled LLM Agent Skill & Modding Docs
 This repository includes a ready-to-use **Agent Skill** and context guide summarizing *Against the Storm*'s service architecture, lifecycle hooks, clean-room metadata inspection commands, and engine pitfalls (such as non-readable GPU sprite crashes, localization scene-reload loops, and sidecar save fingerprinting):
-- **[AGENTS.md](AGENTS.md)** — Automatic repository map and guardrails picked up by coding agents (*Antigravity, Claude Code, Cursor, Codex, GitHub Copilot*, etc.).
-- **[.agents/skills/ats-modding/SKILL.md](.agents/skills/ats-modding/SKILL.md)** — Step-by-step workflow for extending this mod or bootstrapping a brand-new *Against the Storm* mod from scratch.
-- **[ats-architecture-and-pitfalls.md](.agents/skills/ats-modding/references/ats-architecture-and-pitfalls.md)** — Deep-dive reference on `Eremite` services, `ATS_API` gotchas, UI docking, and meta-reward persistence (can also be pasted directly into any chat LLM).
+- **[AGENTS.md](https://github.com/pdewilde/against-the-storm-imperial-logistics/blob/main/AGENTS.md)** — Automatic repository map and guardrails picked up by coding agents (*Antigravity, Claude Code, Cursor, Codex, GitHub Copilot*, etc.).
+- **[.agents/skills/ats-modding/SKILL.md](https://github.com/pdewilde/against-the-storm-imperial-logistics/blob/main/.agents/skills/ats-modding/SKILL.md)** — Step-by-step workflow for extending this mod or bootstrapping a brand-new *Against the Storm* mod from scratch.
+- **[ats-architecture-and-pitfalls.md](https://github.com/pdewilde/against-the-storm-imperial-logistics/blob/main/.agents/skills/ats-modding/references/ats-architecture-and-pitfalls.md)** — Deep-dive reference on `Eremite` services, `ATS_API` gotchas, UI docking, and meta-reward persistence (can also be pasted directly into any chat LLM).
 
 ---
 
@@ -85,7 +108,7 @@ Active development on this mod may be limited going forward, so forks, pull requ
 
 ## Trusted Builds & Verification
 
-Official release archives are built directly from tagged source commits on GitHub-hosted runners via [GitHub Actions](.github/workflows/release.yml) with **SLSA Build Provenance Attestations** (`actions/attest-build-provenance`). You can cryptographically verify any release archive with the GitHub CLI:
+Official release archives are built directly from tagged source commits on GitHub-hosted runners via [GitHub Actions](https://github.com/pdewilde/against-the-storm-imperial-logistics/blob/main/.github/workflows/release.yml) with **SLSA Build Provenance Attestations** (`actions/attest-build-provenance`). You can cryptographically verify any release archive with the GitHub CLI:
 
 ```bash
 gh attestation verify pdewilde-ImperialLogistics-1.0.0.zip --owner pdewilde

@@ -2,8 +2,10 @@
 
 ## 1.0.0
 - Initial release:
-  - Automated Smart Supply Chains (surplus ingredient priority, raw food & fuel safety floors, demand-scaled intermediate caps).
-  - Per-building Workshop Mastery (`+1★` stepped recipe upgrades up to `3★` + curated 4th bonus recipes).
-  - Tier 4 **Imperial Highways** (`+45%` walk speed, drag-to-upgrade over lower roads, available anytime from Year 1).
-  - Unlockable Smart Camp Auto-Move & Tier 2 Outpost Carts for Woodcutters' and Gathering Camps, plus Warehouse Hauler Automatons.
-  - Continue Settlement (*Imperial Overtime*) with Hearth Storm-Wards (`-45` Hostility), sequential Grand Orders I–III, native Difficulty-scaled Citadel currency payouts, Cycle caravan boons, and Move-On summary.
+  - **Automated Smart Supply Chains:** Surplus-first ingredient priority (`0–3`), edible raw food & hearth fuel safety floors (returning unused buffered ingredients), and demand-scaled intermediate production caps respecting manual local and global limits.
+  - **Workshop Mastery:** Per-building Mastery Dock with individual stepped star upgrades (`0★ → ★1 → ★2 → ★3`) and 1 curated thematic 4th bonus recipe per workshop.
+  - **Tier 4 Imperial Highways:** Distinct gilded royal-gold flagstones & build icon, `+45%` default walk speed (configurable live up to `+500%`), drag-to-upgrade over lower roads, available anytime from Year 1.
+  - **Smart Camp Auto-Move & Haulers:** Unlockable path-verified auto-relocation (respecting Woodcutter glade safety modes) and Tier 2 Outpost Carts for Woodcutters' & Gathering Camps, plus Warehouse Hauler Automatons.
+  - **Continue Settlement (*Imperial Overtime*):** Updated Victory & Continue Settlement prompts, Hearth Storm-Wards (`-45` Hostility), sequential Grand Orders I–IV awarding Difficulty-scaled Citadel currencies, Cycle Caravan Boons, and Cycle Seal Fragments (Shards), escalating Excess Reputation Acclaim rewards (Amber, Food Stockpiles, capped Cycle Embarkation Point, and alternating Machinery/Artifacts), and a compact Move-On summary.
+  - **Vanilla Save Compatibility:** Native `MetaSave`/`WorldSave` hygiene when finishing settlements, a two-step Pause Menu **Prepare Save for Vanilla** converter with automatic backups, and an offline PowerShell rescue script (`scripts/revert-save-to-vanilla.ps1`).
+  - **Developer & LLM Modding Kit:** Bundled `AGENTS.md` and `.agents/skills/ats-modding/SKILL.md` for extending this mod or creating new *Against the Storm* mods.
