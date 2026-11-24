@@ -51,7 +51,7 @@ Every pillar, cost, reserve floor, speed bonus, and reward value can be toggled 
 
 ## Getting Started (Developing & Modding with LLMs)
 
-Whether you want to tweak this mod, implement one of the ideas below, or use the [GitHub repository](https://github.com/pdewilde/ATS-ImperialLogistics) as a starter template to build your own *Against the Storm* mod with an AI coding assistant, everything is set up to build locally in one command.
+Whether you want to tweak this mod, implement one of the ideas below, or use the [GitHub repository](https://github.com/pdewilde/against-the-storm-imperial-logistics) as a starter template to build your own *Against the Storm* mod with an AI coding assistant, everything is set up to build locally in one command.
 
 ### Prerequisites
 1. [.NET SDK](https://dotnet.microsoft.com/download) (6.0 or newer).
