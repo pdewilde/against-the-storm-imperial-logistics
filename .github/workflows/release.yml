@@ -22,10 +22,10 @@ jobs:
       ATS_REFS_TOKEN: ${{ secrets.ATS_REFS_TOKEN }}
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '8.0.x'
 
@@ -65,10 +65,10 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '8.0.x'
 
@@ -110,14 +110,14 @@ jobs:
           cat SHA256SUMS.txt
 
       - name: Attest Build Provenance (SLSA / Sigstore)
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             dist/pdewilde-ImperialLogistics-*.zip
             dist/ATS_ImperialLogistics.dll
 
       - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pdewilde-ImperialLogistics-package
           path: |
@@ -127,7 +127,7 @@ jobs:
 
       - name: Publish GitHub Release on Tag
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
           files: |
