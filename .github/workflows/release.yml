@@ -41,10 +41,19 @@ jobs:
           unzip -j -q api_pkg.zip "API.dll" -d ci-libs/ || unzip -j -q api_pkg.zip "*/API.dll" -d ci-libs/
           rm -f api_pkg.zip
 
+          FETCH_URL="$ATS_REFS_URL"
+          ACCEPT_HDR="application/octet-stream"
+          if [[ "$FETCH_URL" =~ ^https://raw\.githubusercontent\.com/([^/]+)/([^/]+)/([^/]+)/(.+)$ ]]; then
+            FETCH_URL="https://api.github.com/repos/${BASH_REMATCH[1]}/${BASH_REMATCH[2]}/contents/${BASH_REMATCH[4]}?ref=${BASH_REMATCH[3]}"
+            ACCEPT_HDR="application/vnd.github.raw+json"
+          elif [[ "$FETCH_URL" == *"/contents/"* ]]; then
+            ACCEPT_HDR="application/vnd.github.raw+json"
+          fi
+
           if [ -n "$ATS_REFS_TOKEN" ]; then
-            curl -fsSL -H "Authorization: Bearer $ATS_REFS_TOKEN" -H "Accept: application/octet-stream" "$ATS_REFS_URL" -o ci-refs.zip
+            curl -fsSL -H "Authorization: Bearer $ATS_REFS_TOKEN" -H "Accept: $ACCEPT_HDR" -H "X-GitHub-Api-Version: 2022-11-28" "$FETCH_URL" -o ci-refs.zip
           else
-            curl -fsSL "$ATS_REFS_URL" -o ci-refs.zip
+            curl -fsSL "$FETCH_URL" -o ci-refs.zip
           fi
           unzip -q ci-refs.zip -d ci-libs/
           rm -f ci-refs.zip
@@ -87,10 +96,19 @@ jobs:
             exit 1
           fi
 
+          FETCH_URL="$ATS_REFS_URL"
+          ACCEPT_HDR="application/octet-stream"
+          if [[ "$FETCH_URL" =~ ^https://raw\.githubusercontent\.com/([^/]+)/([^/]+)/([^/]+)/(.+)$ ]]; then
+            FETCH_URL="https://api.github.com/repos/${BASH_REMATCH[1]}/${BASH_REMATCH[2]}/contents/${BASH_REMATCH[4]}?ref=${BASH_REMATCH[3]}"
+            ACCEPT_HDR="application/vnd.github.raw+json"
+          elif [[ "$FETCH_URL" == *"/contents/"* ]]; then
+            ACCEPT_HDR="application/vnd.github.raw+json"
+          fi
+
           if [ -n "$ATS_REFS_TOKEN" ]; then
-            curl -fsSL -H "Authorization: Bearer $ATS_REFS_TOKEN" -H "Accept: application/octet-stream" "$ATS_REFS_URL" -o ci-refs.zip
+            curl -fsSL -H "Authorization: Bearer $ATS_REFS_TOKEN" -H "Accept: $ACCEPT_HDR" -H "X-GitHub-Api-Version: 2022-11-28" "$FETCH_URL" -o ci-refs.zip
           else
-            curl -fsSL "$ATS_REFS_URL" -o ci-refs.zip
+            curl -fsSL "$FETCH_URL" -o ci-refs.zip
           fi
           unzip -q ci-refs.zip -d ci-libs/
           rm -f ci-refs.zip
