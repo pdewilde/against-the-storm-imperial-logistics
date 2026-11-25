@@ -11,21 +11,25 @@ on:
 permissions:
   contents: read
 
+env:
+  CI: true
+  ATS_API_VERSION: "3.7.0"
+  ATS_API_SHA256: "331d34fe4d1df16cd1ad4dfeae8e91e2418d426bf7284be648cc9976e315f99d"
+  ATS_REFS_SHA256: "da31f76d8f9638e0b002a0ea02c12fa1a310896721db3a4fc9cd6285c1653650"
+
 jobs:
   pr-check:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     env:
-      CI: true
-      ATS_API_VERSION: "3.7.0"
       ATS_REFS_URL: ${{ secrets.ATS_REFS_URL }}
       ATS_REFS_TOKEN: ${{ secrets.ATS_REFS_TOKEN }}
     steps:
       - name: Checkout source
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v6
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
           dotnet-version: '8.0.x'
 
@@ -38,6 +42,7 @@ jobs:
 
           mkdir -p ci-libs
           curl -fsSL "https://thunderstore.io/package/download/ATS_API_Devs/API/${ATS_API_VERSION}/" -o api_pkg.zip
+          echo "${ATS_API_SHA256}  api_pkg.zip" | sha256sum -c -
           unzip -j -q api_pkg.zip "API.dll" -d ci-libs/ || unzip -j -q api_pkg.zip "*/API.dll" -d ci-libs/
           rm -f api_pkg.zip
 
@@ -55,10 +60,11 @@ jobs:
           else
             curl -fsSL "$FETCH_URL" -o ci-refs.zip
           fi
+          echo "${ATS_REFS_SHA256}  ci-refs.zip" | sha256sum -c -
           unzip -q ci-refs.zip -d ci-libs/
           rm -f ci-refs.zip
 
-          dotnet restore ATS_ImperialLogistics.csproj
+          dotnet restore ATS_ImperialLogistics.csproj --locked-mode
           dotnet build ATS_ImperialLogistics.csproj -c Release --no-restore
 
   build:
@@ -68,26 +74,24 @@ jobs:
       contents: write
       id-token: write
       attestations: write
-    env:
-      CI: true
-      ATS_API_VERSION: "3.7.0"
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v6
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
           dotnet-version: '8.0.x'
 
-      - name: Fetch ATS_API from Thunderstore & stripped game reference stubs
+      - name: Fetch & verify ATS_API from Thunderstore + stripped game reference stubs
         env:
           ATS_REFS_URL: ${{ secrets.ATS_REFS_URL }}
           ATS_REFS_TOKEN: ${{ secrets.ATS_REFS_TOKEN }}
         run: |
           mkdir -p ci-libs
           curl -fsSL "https://thunderstore.io/package/download/ATS_API_Devs/API/${ATS_API_VERSION}/" -o api_pkg.zip
+          echo "${ATS_API_SHA256}  api_pkg.zip" | sha256sum -c -
           unzip -j -q api_pkg.zip "API.dll" -d ci-libs/ || unzip -j -q api_pkg.zip "*/API.dll" -d ci-libs/
           rm -f api_pkg.zip
 
@@ -110,12 +114,13 @@ jobs:
           else
             curl -fsSL "$FETCH_URL" -o ci-refs.zip
           fi
+          echo "${ATS_REFS_SHA256}  ci-refs.zip" | sha256sum -c -
           unzip -q ci-refs.zip -d ci-libs/
           rm -f ci-refs.zip
 
-      - name: Restore & Build (Release)
+      - name: Restore (Locked Mode) & Build (Release)
         run: |
-          dotnet restore ATS_ImperialLogistics.csproj
+          dotnet restore ATS_ImperialLogistics.csproj --locked-mode
           dotnet build ATS_ImperialLogistics.csproj -c Release --no-restore
           rm -rf ci-libs
 
@@ -128,14 +133,14 @@ jobs:
           cat SHA256SUMS.txt
 
       - name: Attest Build Provenance (SLSA / Sigstore)
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: |
             dist/pdewilde-ImperialLogistics-*.zip
             dist/ATS_ImperialLogistics.dll
 
       - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: pdewilde-ImperialLogistics-package
           path: |
@@ -145,7 +150,7 @@ jobs:
 
       - name: Publish GitHub Release on Tag
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           generate_release_notes: true
           files: |

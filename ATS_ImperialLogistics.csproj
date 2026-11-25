@@ -11,8 +11,12 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>disable</Nullable>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
 
     <UseCiReferences Condition="'$(CI)' == 'true' or Exists('$(MSBuildProjectDirectory)\ci-libs\Assembly-CSharp.dll')">true</UseCiReferences>
+    <RestorePackagesWithLockFile Condition="'$(UseCiReferences)' == 'true'">true</RestorePackagesWithLockFile>
+    <NuGetLockFilePath Condition="'$(UseCiReferences)' == 'true'">packages.ci.lock.json</NuGetLockFilePath>
     <DisableImplicitFrameworkReferences Condition="'$(UseCiReferences)' != 'true'">true</DisableImplicitFrameworkReferences>
     <NoStdLib Condition="'$(UseCiReferences)' != 'true'">true</NoStdLib>
 
