@@ -2,7 +2,8 @@
 
 A comprehensive Quality-of-Life and Late-Game progression mod for *Against the Storm* that streamlines settlement logistics, lets you specialize workshops & camps using crafted packs, adds Tier 4 **Imperial Highways**, and turns **Continue Settlement** into a rewarding post-victory endgame.
 
-![Gilded Imperial Highway in Against the Storm](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/imperial-highway-banner.jpg)
+![Year XX 418-Villager Imperial Overtime Megacity with Gilded Imperial Highways](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/megacity-golden-highway-hero.jpg)
+*A Year XX Imperial Overtime megacity (`418` villagers, `299` Beaver Resolve, `90k+` Food) powered by Smart Supply Chains, Mastered Workshops, Hearth Storm-Wards, and a gilded Imperial Highway network.*
 
 ---
 
@@ -46,24 +47,25 @@ Clicking **Continue Settlement** after winning (including **Sealed Forest** vict
 
 ## Screenshots
 
-### Building Docks — Workshop Mastery, Camp Auto-Move & Hearth Storm-Wards
-| Workshop Mastery & Smart Caps | Woodcutters' Camp Auto-Move | Hearth Storm-Ward (-45 Hostility) |
+### Building Upgrades — Workshop Mastery, Camp Auto-Move & Hearth Storm-Wards
+| Workshop Mastery & Smart Caps | Woodcutters' Camp Auto-Move | Hearth Storm-Ward (`-45` Hostility) |
 | :---: | :---: | :---: |
 | ![Workshop Mastery Dock](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/workshop-mastery-dock.jpg) | ![Camp Auto-Move Dock](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/camp-automove-dock.jpg) | ![Hearth Storm-Ward Dock](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/hearth-storm-ward.jpg) |
 
-### Imperial Overtime — Enter Overtime, Grand Orders & Move-On Summary
-| Enter Imperial Overtime Prompt | Overtime Move-On Summary |
+### Tier 4 Gilded Imperial Highways
+| Gilded Flagstones & Roads Build Tab | Live Speed Tooltip & Drag-to-Upgrade |
+| :---: | :---: |
+| ![Imperial Highway Close-Up](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/imperial-highway-banner.jpg) | ![Imperial Highway Tooltip](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/imperial-highway-tooltip.jpg) |
+
+### Imperial Overtime — Seamless Entry, Grand Orders I–IV & Citadel Payouts
+| Enter Imperial Overtime Prompt | Balanced Move-On Summary |
 | :---: | :---: |
 | ![Enter Imperial Overtime](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/enter-imperial-overtime.jpg) | ![Imperial Overtime Move-On Summary](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/overtime-move-on-summary.jpg) |
 
 ![Imperial Overtime Grand Orders](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/overtime-grand-orders.jpg)
 
-![Year XXI Overtime Economy](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/overtime-year21-economy.jpg)
-
-### Imperial Highways & Live In-Game Mod Options
-| Imperial Highway Build Menu & Tooltip | In-Game Mod Options & Sliders |
-| :---: | :---: |
-| ![Imperial Highway Tooltip](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/imperial-highway-tooltip.jpg) | ![In-Game Mod Options](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/mods-options.jpg) |
+### Live In-Game Mod Options (`Options → Mods`)
+![In-Game Mod Options](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/mods-options.jpg)
 
 ---
 
