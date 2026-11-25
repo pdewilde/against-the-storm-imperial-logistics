@@ -51,10 +51,12 @@ Clicking **Continue Settlement** after winning (including **Sealed Forest** vict
 | :---: | :---: | :---: |
 | ![Workshop Mastery Dock](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/workshop-mastery-dock.jpg) | ![Camp Auto-Move Dock](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/camp-automove-dock.jpg) | ![Hearth Storm-Ward Dock](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/hearth-storm-ward.jpg) |
 
-### Imperial Overtime — Grand Orders, Move-On Summary & Year XXI Megacity
-![Imperial Overtime Grand Orders](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/overtime-grand-orders.jpg)
+### Imperial Overtime — Enter Overtime, Grand Orders & Move-On Summary
+| Enter Imperial Overtime Prompt | Overtime Move-On Summary |
+| :---: | :---: |
+| ![Enter Imperial Overtime](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/enter-imperial-overtime.jpg) | ![Imperial Overtime Move-On Summary](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/overtime-move-on-summary.jpg) |
 
-![Imperial Overtime Move-On Summary](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/overtime-move-on-summary.jpg)
+![Imperial Overtime Grand Orders](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/overtime-grand-orders.jpg)
 
 ![Year XXI Overtime Economy](https://raw.githubusercontent.com/pdewilde/against-the-storm-imperial-logistics/main/docs/screenshots/overtime-year21-economy.jpg)
 
