@@ -47,7 +47,21 @@ namespace ATS_ImperialLogistics.Helpers
         public static IMetaStateService MetaState => MetaStateService;
         public static IIronmanService Ironman => IronmanService;
         public static IWorldStateService WorldState => WorldStateService;
-        public static ICycleEffectsService CycleEffects => CycleEffectsService;
+        public static ICycleEffectsService CycleEffects
+        {
+            get
+            {
+                try
+                {
+                    return CycleEffectsService;
+                }
+                catch
+                {
+                    // WorldServices is unloaded inside settlement scenes; return null cleanly so callers fall back to WorldState.CycleEffects
+                    return null;
+                }
+            }
+        }
 
         public static void PlayClickSuccess()
         {
