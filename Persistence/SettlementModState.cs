@@ -58,6 +58,8 @@ namespace ATS_ImperialLogistics.Persistence
         public int OvertimeBankedEmbarkPoints = 0;
         public int OvertimeBankedCycleVillagers = 0;
         public int OvertimeBankedSealFragments = 0;
+        public int OvertimeBankedExp = 0;
+        public int OvertimeLevelsGained = 0;
         public float OvertimeExcessReputationProgress = 0f;
         public int OvertimeExcessReputationMilestones = 0;
         public int OvertimeExcessReputationEmbarkPointsEarned = 0;

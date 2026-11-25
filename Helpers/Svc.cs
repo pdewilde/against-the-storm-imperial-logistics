@@ -45,6 +45,7 @@ namespace ATS_ImperialLogistics.Helpers
         public static IMetaEconomyService MetaEconomy => MetaEconomyService;
         public static IMetaPerksService MetaPerks => MetaPerksService;
         public static IMetaStateService MetaState => MetaStateService;
+        public static IIronmanService Ironman => IronmanService;
         public static IWorldStateService WorldState => WorldStateService;
         public static ICycleEffectsService CycleEffects => CycleEffectsService;
 

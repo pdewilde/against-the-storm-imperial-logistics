@@ -20,7 +20,7 @@ namespace ATS_ImperialLogistics
     {
         public const string PluginGuid = "com.pdewilde.ats.imperiallogistics";
         public const string PluginName = "Imperial Logistics & Overtime";
-        public const string PluginVersion = "1.0.0";
+        public const string PluginVersion = "1.1.0";
 
         internal static ManualLogSource Log;
         private Harmony _harmony;

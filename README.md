@@ -31,9 +31,9 @@ Select any finished Workshop to access its **Mastery Dock**:
 ### 4. Continue Settlement Overhaul (*Imperial Overtime*)
 Clicking **Continue Settlement** after winning (including **Sealed Forest** victories) activates **Imperial Overtime**:
 - **Hearth Storm-Wards:** Light Wildfire Storm-Wards on Hearths (`10` Build Packs + `2` Wildfire Essence) for **`-45` Forest Hostility** per upgraded Hearth to offset endless yearly hostility scaling.
-- **Grand Orders I–IV (Difficulty-Scaled Citadel & Seal Payouts):** Complete four sequential industrial commissions to bank permanent Smoldering City currencies (**Food Stockpiles**, **Machinery**, **Artifacts** — scaled automatically by your settlement's **Difficulty Multiplier** and Smoldering City `%` bonus), **Cycle-long Caravan Boons** (`+2` Bonus Embarkation Points & `+1` Bonus Starting Villager across Charters II & III), and **Cycle Seal Fragments / Shards** (`+1` base scaled by Difficulty on Charter IV).
-- **Excess Reputation Acclaim:** Surplus Reputation earned past Victory (from **High Resolve**, **Abandoned Caches**, **Glade Events**, remaining **Orders**, and **Perks**) continues to fill an escalating Overtime Acclaim meter (`1.0, 1.5, 2.0, 2.5...` Rep per milestone, visible on the Reputation Bar tooltip). Each milestone delivers **`+5` Amber** and banks **`+1` Citadel Food Stockpile** (Difficulty-scaled), with every **5th** milestone triggering a **Major Acclaim** (`+1` Wildfire Essence plus **`+1` Cycle Embarkation Point** up to `1` per settlement, then alternating Difficulty-scaled **Machinery** or **Artifacts**).
-- **Move-On Summary:** Clicking **Move On** in the pause menu displays a compact summary of all Citadel currencies, Seal Fragments, Excess Reputation milestones, and Cycle boons banked during Overtime.
+- **Grand Orders I–IV (Difficulty-Scaled Citadel, XP & Seal Payouts):** Complete four sequential industrial commissions to bank permanent Smoldering City currencies (**Food Stockpiles**, **Machinery**, **Artifacts** — scaled automatically by your settlement's **Difficulty Multiplier** and Smoldering City `%` bonus), **Smoldering City XP** (`+15/+25/+35/+45` base, scaled by Difficulty, with full level-up reward unlocks!), **Cycle-long Caravan Boons** (`+2` Bonus Embarkation Points & `+1` Bonus Starting Villager across Charters II & III), and **Cycle Seal Fragments / Shards** (`+1` base scaled by Difficulty on Charter IV).
+- **Excess Reputation Acclaim:** Surplus Reputation earned past Victory (from **High Resolve**, **Abandoned Caches**, **Glade Events**, remaining **Orders**, and **Perks**) continues to fill an escalating Overtime Acclaim meter (`1.0, 1.5, 2.0, 2.5...` Rep per milestone, visible on the Reputation Bar tooltip). Each milestone delivers **`+5` Amber**, banks **`+1` Citadel Food Stockpile**, and grants **`+5` base Citadel XP** (Difficulty-scaled), with every **5th** milestone triggering a **Major Acclaim** (`+1` Wildfire Essence plus **`+1` Cycle Embarkation Point** up to `1` per settlement, then alternating Difficulty-scaled **Machinery** or **Artifacts**).
+- **Move-On Summary:** Clicking **Move On** in the pause menu displays a compact summary of all Citadel currencies, XP / Level Ups, Seal Fragments, Excess Reputation milestones, and Cycle boons banked during Overtime.
 
 ---
 
@@ -115,7 +115,7 @@ Active development on this mod may be limited going forward, so forks, pull requ
 Official release archives are built directly from tagged source commits on GitHub-hosted runners via [GitHub Actions](https://github.com/pdewilde/against-the-storm-imperial-logistics/blob/main/.github/workflows/release.yml) with **SLSA Build Provenance Attestations** (`actions/attest-build-provenance`). You can cryptographically verify any release archive with the GitHub CLI:
 
 ```bash
-gh attestation verify pdewilde-ImperialLogistics-1.0.0.zip --owner pdewilde
+gh attestation verify pdewilde-ImperialLogistics-1.1.0.zip --owner pdewilde
 ```
 
 ---

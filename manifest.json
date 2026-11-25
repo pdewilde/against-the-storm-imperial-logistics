@@ -1,6 +1,6 @@
 {
   "name": "ImperialLogistics",
-  "version_number": "1.0.0",
+  "version_number": "1.1.0",
   "website_url": "https://github.com/pdewilde/against-the-storm-imperial-logistics",
   "description": "Smart supply chains, individual workshop recipe star upgrades & 4th recipes, unlockable camp auto-move, Tier 4 Imperial Highways, and Continue Settlement Grand Orders with difficulty-scaled Citadel rewards.",
   "dependencies": [

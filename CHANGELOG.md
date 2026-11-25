@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0
+- **Overtime Smoldering City XP & Level-Ups:**
+  - Grand Orders I–IV now award Difficulty-scaled **Smoldering City XP** (`+15 / +25 / +35 / +45` base, configurable) so your Citadel Level stays in sync with your Overtime Citadel Resources.
+  - Each Excess Reputation Acclaim milestone also grants Difficulty-scaled **Smoldering City XP** (`+5` base, configurable).
+  - Crossing a level threshold in Overtime automatically advances your Smoldering City Level, unlocks that level's rewards (`MetaRewardModel.Consume()`), and posts a Level Up alert.
+  - Updated Grand Order tooltips, Reputation Bar tooltip, Move-On Summary (`+N XP (+L Lv)`), and the Victory / Continue Settlement prompts to reflect Overtime XP.
+
 ## 1.0.0
 - Initial release:
   - **Automated Smart Supply Chains:** Surplus-first ingredient priority (`0–3`), edible raw food & hearth fuel safety floors (returning unused buffered ingredients), and demand-scaled intermediate production caps respecting manual local and global limits.

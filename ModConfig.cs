@@ -55,11 +55,16 @@ namespace ATS_ImperialLogistics
         public static ConfigEntry<int> Wave3BonusEmbarkPoints;
         public static ConfigEntry<int> Wave3BonusCycleVillagers;
         public static ConfigEntry<int> Wave4SealFragmentsReward;
+        public static ConfigEntry<int> Wave1ExpReward;
+        public static ConfigEntry<int> Wave2ExpReward;
+        public static ConfigEntry<int> Wave3ExpReward;
+        public static ConfigEntry<int> Wave4ExpReward;
 
         // Excess Reputation Rewards in Overtime
         public static ConfigEntry<bool> EnableOvertimeExcessReputation;
         public static ConfigEntry<int> ExcessReputationAmberReward;
         public static ConfigEntry<int> ExcessReputationBreadReward;
+        public static ConfigEntry<int> ExcessReputationExpReward;
         public static ConfigEntry<int> ExcessReputationBonusEveryN;
         public static ConfigEntry<int> ExcessReputationEmbarkPointsCap;
         public static ConfigEntry<float> ExcessReputationStepIncrease;
@@ -201,6 +206,18 @@ namespace ATS_ImperialLogistics
             Wave4SealFragmentsReward = config.Bind(
                 "4. Continue Settlement Overtime", "Wave4SealFragmentsReward", 1,
                 new ConfigDescription("Base (1.0x Settler) Cycle Seal Fragments (Shards) granted by Grand Order IV (scales with Difficulty multiplier when enabled).", new AcceptableValueRange<int>(0, 15)));
+            Wave1ExpReward = config.Bind(
+                "4. Continue Settlement Overtime", "Wave1ExpReward", 15,
+                new ConfigDescription("Base (1.0x Settler) Smoldering City XP granted by Grand Order I (scales with Difficulty multiplier when enabled).", new AcceptableValueRange<int>(0, 300)));
+            Wave2ExpReward = config.Bind(
+                "4. Continue Settlement Overtime", "Wave2ExpReward", 25,
+                new ConfigDescription("Base (1.0x Settler) Smoldering City XP granted by Grand Order II (scales with Difficulty multiplier when enabled).", new AcceptableValueRange<int>(0, 300)));
+            Wave3ExpReward = config.Bind(
+                "4. Continue Settlement Overtime", "Wave3ExpReward", 35,
+                new ConfigDescription("Base (1.0x Settler) Smoldering City XP granted by Grand Order III (scales with Difficulty multiplier when enabled).", new AcceptableValueRange<int>(0, 300)));
+            Wave4ExpReward = config.Bind(
+                "4. Continue Settlement Overtime", "Wave4ExpReward", 45,
+                new ConfigDescription("Base (1.0x Settler) Smoldering City XP granted by Grand Order IV (scales with Difficulty multiplier when enabled).", new AcceptableValueRange<int>(0, 300)));
 
             EnableOvertimeExcessReputation = config.Bind(
                 "4. Continue Settlement Overtime", "EnableOvertimeExcessReputation", true,
@@ -211,6 +228,9 @@ namespace ATS_ImperialLogistics
             ExcessReputationBreadReward = config.Bind(
                 "4. Continue Settlement Overtime", "ExcessReputationBreadReward", 1,
                 new ConfigDescription("Base (1.0x Settler) Citadel Food Stockpiles banked permanently for each Excess Reputation Acclaim milestone in Overtime.", new AcceptableValueRange<int>(0, 50)));
+            ExcessReputationExpReward = config.Bind(
+                "4. Continue Settlement Overtime", "ExcessReputationExpReward", 5,
+                new ConfigDescription("Base (1.0x Settler) Smoldering City XP granted for each Excess Reputation Acclaim milestone in Overtime (scales with Difficulty).", new AcceptableValueRange<int>(0, 100)));
             ExcessReputationBonusEveryN = config.Bind(
                 "4. Continue Settlement Overtime", "ExcessReputationBonusEveryN", 5,
                 new ConfigDescription("Every Nth Excess Reputation milestone triggers a Major Acclaim (+1 Wildfire Essence plus +1 Cycle Embarkation Point up to cap, then alternating Machinery or Artifact).", new AcceptableValueRange<int>(1, 20)));
